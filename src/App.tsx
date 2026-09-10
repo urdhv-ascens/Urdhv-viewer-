@@ -82,63 +82,85 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col selection:bg-emerald-500/20 selection:text-emerald-300">
-      {/* Top Sponsor Bar */}
-      {ads?.topBar?.enabled !== false && (
-        <TopSponsorBar
-          slides={ads?.topBar?.slides || []}
-          rotationIntervalSeconds={ads?.topBar?.rotationIntervalSeconds || 6}
-        />
-      )}
-
-      {/* Main Studio Navigation Header */}
-      <header className="sticky top-0 z-30 bg-black border-b border-zinc-850 px-4 sm:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <a href="https://gold-cat-133405.hostingersite.com" className="flex items-center gap-2.5 group">
-            <img src="/logo.png" alt="Ūrdhv Ascens" className="h-7 w-auto object-contain transition-transform group-hover:scale-105" />
-            <span className="text-base sm:text-lg font-black tracking-widest text-white uppercase">
-              ŪRDHV <span className="text-emerald-400">ASCENS</span>
-            </span>
-          </a>
-          <span className="hidden sm:inline-block px-2.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-900 border border-zinc-800 text-zinc-400">
-            Curriculum Reader
-          </span>
-        </div>
-
-        <a
-          href="https://gold-cat-133405.hostingersite.com"
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
-        >
-          <span>Studio Flagship</span>
-          <ExternalLink className="w-3 h-3 text-zinc-500" />
-        </a>
-      </header>
-
-      {/* Mobile Top Ad Banner for Mobile View */}
-      {ads?.mobileBanner?.enabled !== false && (
-        <MobileTopAdBanner
-          slides={ads?.mobileBanner?.slides || []}
-          rotationIntervalSeconds={ads?.mobileBanner?.rotationIntervalSeconds || 5}
-        />
-      )}
-
-      {/* Viewport Content */}
-      <main className="flex-1 relative">
-
-        {/* Desktop Side Ads for large viewports */}
-        {ads && ads.sideAds && (
-          <DesktopSideAds
-            slides={ads.sideAds.slides}
-            leftAd={ads.sideAds.leftAd}
-            rightAd={ads.sideAds.rightAd}
-            rotationIntervalSeconds={ads.sideAds.rotationIntervalSeconds}
+      {/* Sticky Top Bar & Navigation Zone - Mobile Ad constantly on screen above */}
+      <div className="sticky top-0 z-40 w-full bg-black/95 backdrop-blur-md">
+        {/* Desktop Top Sponsor Bar */}
+        {ads?.topBar?.enabled !== false && (
+          <TopSponsorBar
+            slides={ads?.topBar?.slides || []}
+            rotationIntervalSeconds={ads?.topBar?.rotationIntervalSeconds || 6}
           />
         )}
 
-        {/* Booklet Library Grid */}
-        <BookletLibrary
-          booklets={booklets}
-          onSelectBooklet={handleSelectBooklet}
-        />
+        {/* Main Studio Navigation Header */}
+        <header className="border-b border-zinc-850 px-3 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between">
+          <div className="flex items-center space-x-2.5 sm:space-x-3">
+            <a href="https://urdhvascens.pages.dev" className="flex items-center gap-2 group">
+              <img src="/logo.png" alt="Ūrdhv Ascens" className="h-6 sm:h-7 w-auto object-contain transition-transform group-hover:scale-105" />
+              <span className="text-sm sm:text-lg font-black tracking-widest text-white uppercase">
+                ŪRDHV <span className="text-emerald-400">ASCENS</span>
+              </span>
+            </a>
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-900 border border-zinc-800 text-zinc-400">
+              Curriculum Reader
+            </span>
+          </div>
+
+          <a
+            href="https://urdhvascens.pages.dev"
+            className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-[11px] sm:text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
+          >
+            <span>Studio Flagship</span>
+            <ExternalLink className="w-3 h-3 text-zinc-500" />
+          </a>
+        </header>
+
+        {/* Mobile Top Ad Banner - Wider & Constantly on screen above content */}
+        {ads?.mobileBanner?.enabled !== false && (
+          <div className="block lg:hidden border-b border-zinc-850 bg-black">
+            <MobileTopAdBanner
+              slides={ads?.mobileBanner?.slides || []}
+              rotationIntervalSeconds={ads?.mobileBanner?.rotationIntervalSeconds || 5}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Viewport Content with Non-overlapping Desktop Side Gutters */}
+      <main className="flex-1 w-full relative">
+        <div className="w-full max-w-[1760px] mx-auto flex justify-center items-start px-2 sm:px-4 lg:px-6 relative">
+          {/* Desktop Left Flanking Side Ad - Dedicated column, NEVER blocks cards */}
+          {ads?.sideAds?.enabled !== false && (
+            <aside className="hidden xl:block w-36 2xl:w-44 shrink-0 sticky top-28 pt-8 mr-3 2xl:mr-6 z-20">
+              <DesktopSideAds
+                position="left"
+                slides={ads?.sideAds?.slides}
+                placement={ads?.sideAds?.leftAd}
+                rotationIntervalSeconds={ads?.sideAds?.rotationIntervalSeconds}
+              />
+            </aside>
+          )}
+
+          {/* Central Booklet Library Grid - 100% unobstructed */}
+          <div className="flex-1 min-w-0 max-w-7xl">
+            <BookletLibrary
+              booklets={booklets}
+              onSelectBooklet={handleSelectBooklet}
+            />
+          </div>
+
+          {/* Desktop Right Flanking Side Ad - Dedicated column, NEVER blocks cards */}
+          {ads?.sideAds?.enabled !== false && (
+            <aside className="hidden xl:block w-36 2xl:w-44 shrink-0 sticky top-28 pt-8 ml-3 2xl:ml-6 z-20">
+              <DesktopSideAds
+                position="right"
+                slides={ads?.sideAds?.slides}
+                placement={ads?.sideAds?.rightAd}
+                rotationIntervalSeconds={ads?.sideAds?.rotationIntervalSeconds}
+              />
+            </aside>
+          )}
+        </div>
       </main>
 
       {/* Platform Footer */}

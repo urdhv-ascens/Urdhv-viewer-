@@ -66,7 +66,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
           id: 'default-01',
           title: 'ŪRDHV ASCENS STUDIO — Bespoke Digital Solutions',
           subtitle: 'Precision Engineered. Distinctly Elevated.',
-          destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+          destinationUrl: 'https://urdhvascens.pages.dev',
           active: true,
           displayOrder: 1
         }
@@ -80,7 +80,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
           id: 'default-side-01',
           title: 'Enterprise Digital Systems',
           imageUrl: '/uploads/ad_side_1.png',
-          destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+          destinationUrl: 'https://urdhvascens.pages.dev#contact',
           alt: 'Ūrdhv Ascens Studio Engineering',
           active: true,
           displayOrder: 1
@@ -89,7 +89,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
           id: 'default-side-02',
           title: 'Visual AI Curriculum',
           imageUrl: '/uploads/ad_side_2.png',
-          destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+          destinationUrl: 'https://urdhvascens.pages.dev',
           alt: 'Visual AI Curriculum Modules',
           active: true,
           displayOrder: 2
@@ -98,13 +98,13 @@ export async function getAdsConfig(): Promise<AdsConfig> {
       leftAd: {
         enabled: true,
         imageUrl: '/uploads/ad_side_1.png',
-        destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+        destinationUrl: 'https://urdhvascens.pages.dev#contact',
         alt: 'Ūrdhv Ascens Studio Partner'
       },
       rightAd: {
         enabled: true,
         imageUrl: '/uploads/ad_side_2.png',
-        destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+        destinationUrl: 'https://urdhvascens.pages.dev',
         alt: 'Ūrdhv Ascens Studio Partner'
       }
     },
@@ -116,7 +116,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
           id: 'default-mob-01',
           title: 'Ūrdhv Ascens Studio Flagship',
           imageUrl: '/uploads/ad_mobile_1.png',
-          destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+          destinationUrl: 'https://urdhvascens.pages.dev#contact',
           alt: 'Ūrdhv Ascens Studio',
           active: true,
           displayOrder: 1
@@ -125,7 +125,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
           id: 'default-mob-02',
           title: 'Visual AI Curriculum Modules',
           imageUrl: '/uploads/ad_mobile_2.png',
-          destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+          destinationUrl: 'https://urdhvascens.pages.dev',
           alt: 'Visual AI Educational Track',
           active: true,
           displayOrder: 2

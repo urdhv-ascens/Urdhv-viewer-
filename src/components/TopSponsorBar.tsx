@@ -12,7 +12,7 @@ const DEFAULT_TOP_SLIDES: TopBarSlide[] = [
     id: 'default-top-01',
     title: 'ŪRDHV ASCENS STUDIO — Bespoke Digital Solutions & Architecture',
     subtitle: 'Accepting select high-impact projects for 2026',
-    destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+    destinationUrl: 'https://urdhvascens.pages.dev#contact',
     active: true,
     displayOrder: 1
   }
@@ -45,7 +45,7 @@ export const TopSponsorBar: React.FC<TopSponsorBarProps> = ({
       aria-label="Partner Sponsor Announcement"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full bg-zinc-950 border-b border-zinc-850 px-4 py-2 flex items-center justify-between text-xs sm:text-sm text-zinc-300 transition-all z-40"
+      className="hidden lg:flex w-full bg-zinc-950 border-b border-zinc-850 px-4 py-2 items-center justify-between text-xs sm:text-sm text-zinc-300 transition-all z-40 select-none"
     >
       <div className="flex-1 flex items-center justify-center space-x-2 text-center truncate">
         <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-black text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
