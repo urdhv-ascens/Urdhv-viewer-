@@ -188,7 +188,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
               value={pageInput}
               onChange={(e) => setPageInput(e.target.value)}
               onBlur={() => setPageInput(String(currentPage))}
-              className="w-10 sm:w-12 bg-zinc-900 border border-zinc-700 rounded-md text-center py-1 text-xs font-mono text-white focus:outline-none focus:border-amber-500"
+              className="w-10 sm:w-12 bg-zinc-900 border border-zinc-700 rounded-md text-center py-1 text-xs font-mono text-white focus:outline-none focus:border-emerald-400"
             />
             <span className="text-xs text-zinc-500">/ {booklet.totalPages}</span>
           </form>
@@ -246,7 +246,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             onClick={() => setShowThumbnails(!showThumbnails)}
             className={`p-1.5 rounded-lg transition-colors ${
               showThumbnails
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                 : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300'
             }`}
             title="Toggle Page Filmstrip"
@@ -269,7 +269,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
       <main className="flex-1 relative overflow-auto flex items-center justify-center p-2 sm:p-6 bg-zinc-950/95 reader-canvas-container">
         {loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/60 backdrop-blur-sm z-30">
-            <Loader2 className="w-8 h-8 text-amber-400 animate-spin mb-2" />
+            <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
             <p className="text-xs text-zinc-400 font-mono">Rendering high-res page {currentPage}...</p>
           </div>
         )}
@@ -281,7 +281,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             <p className="text-xs text-zinc-400 mb-4">{error}</p>
             <button
               onClick={retry}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs rounded-xl transition-all"
+              className="px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-black font-bold text-xs uppercase tracking-wider rounded-lg transition-colors"
             >
               Retry Loading Page
             </button>
@@ -300,7 +300,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
           onClick={goToPrev}
           disabled={currentPage <= 1}
           aria-label="Previous Page"
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-zinc-900/60 hover:bg-zinc-800/90 text-zinc-300 backdrop-blur-md border border-zinc-800/50 disabled:hidden transition-all z-10"
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -309,7 +309,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
           onClick={goToNext}
           disabled={currentPage >= booklet.totalPages}
           aria-label="Next Page"
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-zinc-900/60 hover:bg-zinc-800/90 text-zinc-300 backdrop-blur-md border border-zinc-800/50 disabled:hidden transition-all z-10"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -330,7 +330,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
               }}
               className={`relative flex-shrink-0 h-20 sm:h-24 aspect-[3/4] rounded-lg overflow-hidden border transition-all ${
                 pageNum === currentPage
-                  ? 'border-amber-400 ring-2 ring-amber-500/40 scale-105'
+                  ? 'border-emerald-400 ring-1 ring-emerald-500/50 scale-105'
                   : 'border-zinc-800 hover:border-zinc-600 opacity-70 hover:opacity-100'
               }`}
             >

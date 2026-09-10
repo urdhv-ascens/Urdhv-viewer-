@@ -60,7 +60,7 @@ export function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
-        <Loader2 className="w-10 h-10 text-amber-400 animate-spin mb-4" />
+        <Loader2 className="w-10 h-10 text-emerald-400 animate-spin mb-4" />
         <p className="text-xs sm:text-sm font-mono tracking-widest text-zinc-400 uppercase">
           Initializing Ūrdhv Ascens Educational Viewer...
         </p>
@@ -69,7 +69,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col selection:bg-amber-500/20 selection:text-amber-300">
+    <div className="min-h-screen bg-black text-white flex flex-col selection:bg-emerald-500/20 selection:text-emerald-300">
       {/* Top Sponsor Bar */}
       {ads && ads.topBar && ads.topBar.enabled && (
         <TopSponsorBar
@@ -79,21 +79,24 @@ export function App() {
       )}
 
       {/* Main Studio Navigation Header */}
-      <header className="sticky top-0 z-30 bg-black/90 border-b border-zinc-800/80 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-black/95 border-b border-zinc-850 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <span className="text-base sm:text-lg font-black tracking-widest text-white uppercase">
-            ŪRDHV <span className="text-amber-400">ASCENS</span>
-          </span>
-          <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-900 border border-zinc-800 text-zinc-400">
+          <a href="https://urdhvascens.com" className="flex items-center gap-2.5 group">
+            <img src="/logo.png" alt="Ūrdhv Ascens" className="h-7 w-auto object-contain transition-transform group-hover:scale-105" />
+            <span className="text-base sm:text-lg font-black tracking-widest text-white uppercase">
+              ŪRDHV <span className="text-emerald-400">ASCENS</span>
+            </span>
+          </a>
+          <span className="hidden sm:inline-block px-2.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-900 border border-zinc-800 text-zinc-400">
             Viewer Platform
           </span>
         </div>
 
         <a
           href="https://urdhvascens.com"
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-zinc-300 hover:text-white transition-all"
+          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
         >
-          <span>Studio Website</span>
+          <span>Studio Flagship</span>
           <ExternalLink className="w-3 h-3 text-zinc-500" />
         </a>
       </header>

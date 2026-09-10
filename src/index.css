@@ -2,13 +2,13 @@
 
 @layer base {
   :root {
-    --bg-primary: #050505;
-    --bg-surface: #0f0f11;
-    --bg-surface-elevated: #18181b;
+    --bg-primary: #000000;
+    --bg-surface: #0a0a0c;
+    --bg-surface-elevated: #121215;
     --border-subtle: #27272a;
-    --border-accent: rgba(212, 175, 55, 0.3);
-    --gold-primary: #d4af37;
-    --gold-light: #ffd700;
+    --border-accent: rgba(0, 255, 102, 0.3);
+    --emerald-primary: #00ff66;
+    --emerald-light: #34d399;
     --text-primary: #ffffff;
     --text-muted: #a1a1aa;
   }

@@ -19,7 +19,7 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({ leftAd, rightAd 
             href={leftAd.destinationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block h-full w-full rounded-xl overflow-hidden border border-zinc-800/80 bg-zinc-900/50 hover:border-amber-500/50 transition-all group"
+            className="block h-full w-full rounded-xl overflow-hidden border border-zinc-850 bg-zinc-950/80 hover:border-emerald-500/50 transition-colors group"
           >
             <img
               src={leftAd.imageUrl}
@@ -40,7 +40,7 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({ leftAd, rightAd 
             href={rightAd.destinationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block h-full w-full rounded-xl overflow-hidden border border-zinc-800/80 bg-zinc-900/50 hover:border-amber-500/50 transition-all group"
+            className="block h-full w-full rounded-xl overflow-hidden border border-zinc-850 bg-zinc-950/80 hover:border-emerald-500/50 transition-colors group"
           >
             <img
               src={rightAd.imageUrl}

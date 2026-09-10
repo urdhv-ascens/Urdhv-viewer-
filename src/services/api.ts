@@ -5,7 +5,7 @@
 
 import type { Booklet, BookletManifest, AdsConfig } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://urdhvascens.com/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://urdhvascens.com/api';
 
 /**
  * Fetch booklet catalog from Hostinger API with local static fallback
