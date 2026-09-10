@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Booklet, AdsConfig } from '../types';
 import { usePageLoader } from '../hooks/usePageLoader';
+import { defaultDocumentProvider } from '../services/documentProvider';
 import { DesktopReaderSideAds } from './DesktopReaderSideAds';
 import { MobileTopAdBanner } from './MobileTopAdBanner';
 import {
@@ -36,6 +37,63 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fullscreen Handlers
+  const exitFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    }
+    setIsFullscreen(false);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen?.();
+      setIsFullscreen(true);
+    } else {
+      exitFullscreen();
+    }
+  }, [exitFullscreen]);
+
+  // Page Navigation Handlers
+  const goToNext = useCallback(() => {
+    if (currentPage < booklet.totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  }, [currentPage, booklet.totalPages]);
+
+  const goToPrev = useCallback(() => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  }, [currentPage]);
+
+  const handlePageJump = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNum = parseInt(pageInput, 10);
+    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= booklet.totalPages) {
+      setCurrentPage(pageNum);
+    } else {
+      setPageInput(String(currentPage));
+    }
+  };
+
+  // Zoom Handlers
+  const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.25, 2.5));
+  const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.25, 0.6));
+  const resetZoom = () => setZoomLevel(1.0);
+
+  // Fit Width Handler
+  const fitWidth = () => {
+    if (containerRef.current && canvasRef.current) {
+      const containerWidth = containerRef.current.clientWidth - 32;
+      const originalWidth = canvasRef.current.width / zoomLevel;
+      if (originalWidth > 0) {
+        const ratio = containerWidth / originalWidth;
+        setZoomLevel(Math.min(Math.max(ratio, 0.7), 2.2));
+      }
+    }
+  };
 
   // Touch swipe handling for mobile
   const touchStartX = useRef<number | null>(null);
@@ -108,70 +166,11 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, booklet.totalPages, isFullscreen]);
-
-  // Page Navigation Handlers
-  const goToNext = useCallback(() => {
-    if (currentPage < booklet.totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  }, [currentPage, booklet.totalPages]);
-
-  const goToPrev = useCallback(() => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  }, [currentPage]);
-
-  const handlePageJump = (e: React.FormEvent) => {
-    e.preventDefault();
-    const pageNum = parseInt(pageInput, 10);
-    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= booklet.totalPages) {
-      setCurrentPage(pageNum);
-    } else {
-      setPageInput(String(currentPage));
-    }
-  };
-
-  // Zoom Handlers
-  const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.25, 2.5));
-  const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.25, 0.6));
-  const resetZoom = () => setZoomLevel(1.0);
-
-  // Fit Width Handler
-  const fitWidth = () => {
-    if (containerRef.current && canvasRef.current) {
-      const containerWidth = containerRef.current.clientWidth - 32;
-      const originalWidth = canvasRef.current.width / zoomLevel;
-      if (originalWidth > 0) {
-        const ratio = containerWidth / originalWidth;
-        setZoomLevel(Math.min(Math.max(ratio, 0.7), 2.2));
-      }
-    }
-  };
-
-  // Fullscreen Handlers
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen?.();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen?.();
-      setIsFullscreen(false);
-    }
-  };
-
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen?.();
-    }
-    setIsFullscreen(false);
-  };
+  }, [goToNext, goToPrev, isFullscreen, exitFullscreen, onBackToLibrary]);
 
   // Helper for thumbnail URL
   const getThumbnailUrl = (index: number) => {
-    const pad = String(index).padStart(4, '0');
-    return `${booklet.cdnBaseUrl}${booklet.thumbnailDirectory}${pad}.webp`;
+    return defaultDocumentProvider.getThumbnailUrl(booklet, index);
   };
 
   return (

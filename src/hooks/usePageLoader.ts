@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Booklet } from '../types';
+import { defaultDocumentProvider } from '../services/documentProvider';
 
 const MAX_CACHED_PAGES = 5;
 
@@ -23,12 +24,10 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
   const [error, setError] = useState<string | null>(null);
   const cacheRef = useRef<Map<number, CachedPage>>(new Map());
 
-  // Calculates deterministic zero-padded page URL
+  // Calculates deterministic page URL via DocumentProvider abstraction
   const getPageUrl = useCallback((index: number) => {
     if (!booklet) return '';
-    const pad = String(index).padStart(4, '0');
-    // If local dev or pages CDN:
-    return `${booklet.cdnBaseUrl}${booklet.pageDirectory}${pad}.${booklet.pageFormat}`;
+    return defaultDocumentProvider.getPageUrl(booklet, index);
   }, [booklet]);
 
   // Evict page furthest from the current page if cache exceeds MAX_CACHED_PAGES
@@ -66,7 +65,20 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
 
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const cleanup = () => {
+        if (timer) clearTimeout(timer);
+        img.onload = null;
+        img.onerror = null;
+      };
+
+      timer = setTimeout(() => {
+        cleanup();
+        reject(new Error(`Page ${pageIdx} request timed out. Please verify network connection.`));
+      }, 12000);
+
       img.onload = () => {
+        cleanup();
         evictIfNecessary(currentPage);
         cache.set(pageIdx, {
           pageIndex: pageIdx,
@@ -78,6 +90,7 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
       };
 
       img.onerror = () => {
+        cleanup();
         reject(new Error(`Failed to load page ${pageIdx} from ${url}`));
       };
 
@@ -160,7 +173,6 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
     loading,
     error,
     renderToCanvas,
-    retry,
-    cachedCount: cacheRef.current.size
+    retry
   };
 }

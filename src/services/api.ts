@@ -13,7 +13,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_U
 export async function getBookletsCatalog(): Promise<Booklet[]> {
   try {
     const res = await fetch(`${API_BASE}/booklets.php`, {
-      headers: { 'Accept': 'application/json' }
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(6000)
     });
     if (res.ok) {
       const data = await res.json();
@@ -27,7 +28,9 @@ export async function getBookletsCatalog(): Promise<Booklet[]> {
 
   // Fallback to bundled static catalog
   try {
-    const fallbackRes = await fetch('/booklets-catalog.json');
+    const fallbackRes = await fetch('/booklets-catalog.json', {
+      signal: AbortSignal.timeout(4000)
+    });
     if (fallbackRes.ok) {
       return await fallbackRes.json();
     }
@@ -43,7 +46,9 @@ export async function getBookletsCatalog(): Promise<Booklet[]> {
  */
 export async function getAdsConfig(): Promise<AdsConfig> {
   try {
-    const res = await fetch(`${API_BASE}/ads.php`);
+    const res = await fetch(`${API_BASE}/ads.php`, {
+      signal: AbortSignal.timeout(5000)
+    });
     if (res.ok) {
       return await res.json();
     }
@@ -136,7 +141,9 @@ export async function getAdsConfig(): Promise<AdsConfig> {
 export async function getBookletManifest(booklet: Booklet): Promise<BookletManifest> {
   const manifestUrl = `${booklet.cdnBaseUrl}/manifest.json`;
   try {
-    const res = await fetch(manifestUrl);
+    const res = await fetch(manifestUrl, {
+      signal: AbortSignal.timeout(5000)
+    });
     if (res.ok) {
       return await res.json();
     }
