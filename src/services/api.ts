@@ -68,8 +68,16 @@ export async function getAdsConfig(): Promise<AdsConfig> {
       ]
     },
     sideAds: {
+      enabled: false,
+      rotationIntervalSeconds: 5,
+      slides: [],
       leftAd: { enabled: false, imageUrl: '', destinationUrl: '', alt: '' },
       rightAd: { enabled: false, imageUrl: '', destinationUrl: '', alt: '' }
+    },
+    mobileBanner: {
+      enabled: false,
+      rotationIntervalSeconds: 5,
+      slides: []
     }
   };
 }

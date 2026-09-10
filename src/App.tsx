@@ -3,6 +3,7 @@ import type { Booklet, AdsConfig } from './types';
 import { getBookletsCatalog, getAdsConfig } from './services/api';
 import { TopSponsorBar } from './components/TopSponsorBar';
 import { DesktopSideAds } from './components/DesktopSideAds';
+import { MobileTopAdBanner } from './components/MobileTopAdBanner';
 import { BookletLibrary } from './components/BookletLibrary';
 import { ReaderEngine } from './components/ReaderEngine';
 import { Loader2, ExternalLink } from 'lucide-react';
@@ -103,11 +104,21 @@ export function App() {
 
       {/* Viewport Content */}
       <main className="flex-1 relative">
+        {/* Mobile Top Ad Banner for Mobile View */}
+        {ads && ads.mobileBanner && ads.mobileBanner.enabled && (
+          <MobileTopAdBanner
+            slides={ads.mobileBanner.slides}
+            rotationIntervalSeconds={ads.mobileBanner.rotationIntervalSeconds}
+          />
+        )}
+
         {/* Desktop Side Ads for 2xl viewports */}
         {ads && ads.sideAds && (
           <DesktopSideAds
+            slides={ads.sideAds.slides}
             leftAd={ads.sideAds.leftAd}
             rightAd={ads.sideAds.rightAd}
+            rotationIntervalSeconds={ads.sideAds.rotationIntervalSeconds}
           />
         )}
 
@@ -123,6 +134,7 @@ export function App() {
         <ReaderEngine
           booklet={selectedBooklet}
           onBackToLibrary={handleBackToLibrary}
+          ads={ads}
         />
       )}
 

@@ -56,11 +56,27 @@ export interface TopBarSlide {
   endDate?: string;
 }
 
-export interface SideAdConfig {
+export interface AdSlide {
+  id: string;
+  title?: string;
+  imageUrl: string;
+  destinationUrl: string;
+  alt?: string;
+  active: boolean;
+  displayOrder?: number;
+}
+
+export interface SideAdPlacement {
   enabled: boolean;
   imageUrl: string;
   destinationUrl: string;
-  alt: string;
+  alt?: string;
+}
+
+export interface MobileBannerConfig {
+  enabled: boolean;
+  rotationIntervalSeconds?: number;
+  slides: AdSlide[];
 }
 
 export interface AdsConfig {
@@ -70,7 +86,11 @@ export interface AdsConfig {
     rotationIntervalSeconds: number;
   };
   sideAds: {
-    leftAd: SideAdConfig;
-    rightAd: SideAdConfig;
+    enabled: boolean;
+    rotationIntervalSeconds?: number;
+    slides: AdSlide[];
+    leftAd: SideAdPlacement;
+    rightAd: SideAdPlacement;
   };
+  mobileBanner: MobileBannerConfig;
 }

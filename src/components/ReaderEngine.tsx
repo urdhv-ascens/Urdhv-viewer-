@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import type { Booklet } from '../types';
+import type { Booklet, AdsConfig } from '../types';
 import { usePageLoader } from '../hooks/usePageLoader';
+import { DesktopReaderSideAds } from './DesktopReaderSideAds';
+import { MobileTopAdBanner } from './MobileTopAdBanner';
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,11 +20,13 @@ import {
 interface ReaderEngineProps {
   booklet: Booklet;
   onBackToLibrary: () => void;
+  ads?: AdsConfig | null;
 }
 
 export const ReaderEngine: React.FC<ReaderEngineProps> = ({
   booklet,
-  onBackToLibrary
+  onBackToLibrary,
+  ads
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [zoomLevel, setZoomLevel] = useState(1.0);
@@ -265,54 +269,85 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         </div>
       </header>
 
+      {/* Mobile Top Ad Banner (Thick image bar for ads on mobile) */}
+      {ads?.mobileBanner?.enabled && ads.mobileBanner.slides && ads.mobileBanner.slides.length > 0 && (
+        <MobileTopAdBanner
+          slides={ads.mobileBanner.slides}
+          rotationIntervalSeconds={ads.mobileBanner.rotationIntervalSeconds || 5}
+        />
+      )}
+
       {/* Main Canvas Reading Viewport */}
-      <main className="flex-1 relative overflow-auto flex items-center justify-center p-2 sm:p-6 bg-zinc-950/95 reader-canvas-container">
-        {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/60 backdrop-blur-sm z-30">
-            <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
-            <p className="text-xs text-zinc-400 font-mono">Rendering high-res page {currentPage}...</p>
-          </div>
+      <main className="flex-1 relative overflow-auto flex items-center justify-between p-2 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container gap-4">
+        {/* Left Side Ad Banner (Desktop) */}
+        {ads?.sideAds?.enabled && (
+          <DesktopReaderSideAds
+            position="left"
+            slides={ads.sideAds.slides}
+            placement={ads.sideAds.leftAd}
+            rotationIntervalSeconds={ads.sideAds.rotationIntervalSeconds}
+          />
         )}
 
-        {error ? (
-          <div className="max-w-md p-6 bg-zinc-900 border border-red-500/30 rounded-2xl text-center z-30 shadow-2xl">
-            <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-white mb-2">Page Delivery Failed</h3>
-            <p className="text-xs text-zinc-400 mb-4">{error}</p>
-            <button
-              onClick={retry}
-              className="px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-black font-bold text-xs uppercase tracking-wider rounded-lg transition-colors"
-            >
-              Retry Loading Page
-            </button>
-          </div>
-        ) : (
-          <div className="relative inline-block transition-transform duration-100 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900">
-            <canvas
-              ref={canvasRef}
-              className="max-w-full max-h-[85vh] h-auto object-contain block"
-            />
-          </div>
+        {/* Central Canvas Reading Area */}
+        <div className="flex-1 flex flex-col items-center justify-center relative min-w-0 h-full">
+          {loading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/60 backdrop-blur-sm z-30">
+              <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
+              <p className="text-xs text-zinc-400 font-mono">Rendering high-res page {currentPage}...</p>
+            </div>
+          )}
+
+          {error ? (
+            <div className="max-w-md p-6 bg-zinc-900 border border-red-500/30 rounded-2xl text-center z-30 shadow-2xl">
+              <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-white mb-2">Page Delivery Failed</h3>
+              <p className="text-xs text-zinc-400 mb-4">{error}</p>
+              <button
+                onClick={retry}
+                className="px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-black font-bold text-xs uppercase tracking-wider rounded-lg transition-colors"
+              >
+                Retry Loading Page
+              </button>
+            </div>
+          ) : (
+            <div className="relative inline-block transition-transform duration-100 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900">
+              <canvas
+                ref={canvasRef}
+                className="max-w-full max-h-[82vh] h-auto object-contain block"
+              />
+            </div>
+          )}
+
+          {/* Large Floating Touch Arrows on mobile/tablet */}
+          <button
+            onClick={goToPrev}
+            disabled={currentPage <= 1}
+            aria-label="Previous Page"
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={goToNext}
+            disabled={currentPage >= booklet.totalPages}
+            aria-label="Next Page"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Right Side Ad Banner (Desktop) */}
+        {ads?.sideAds?.enabled && (
+          <DesktopReaderSideAds
+            position="right"
+            slides={ads.sideAds.slides}
+            placement={ads.sideAds.rightAd}
+            rotationIntervalSeconds={ads.sideAds.rotationIntervalSeconds}
+          />
         )}
-
-        {/* Large Floating Touch Arrows on mobile/tablet */}
-        <button
-          onClick={goToPrev}
-          disabled={currentPage <= 1}
-          aria-label="Previous Page"
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-
-        <button
-          onClick={goToNext}
-          disabled={currentPage >= booklet.totalPages}
-          aria-label="Next Page"
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
       </main>
 
       {/* Bottom Thumbnail Filmstrip Drawer */}

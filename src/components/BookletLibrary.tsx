@@ -165,7 +165,7 @@ export const BookletLibrary: React.FC<BookletLibraryProps> = ({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
           {filteredBooklets.map((booklet) => {
             const coverUrl = booklet.customCoverUrl 
               ? booklet.customCoverUrl 
@@ -177,7 +177,7 @@ export const BookletLibrary: React.FC<BookletLibraryProps> = ({
               <div
                 key={booklet.id}
                 onClick={() => onSelectBooklet(booklet)}
-                className="group relative bg-zinc-950 border border-zinc-850 hover:border-emerald-500/50 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 flex flex-col justify-between"
+                className="group relative bg-zinc-950 border border-zinc-850 hover:border-emerald-500/50 rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 flex flex-col justify-between shadow-lg"
               >
                 {/* Cover Image Frame */}
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-900 border-b border-zinc-850">
@@ -194,49 +194,43 @@ export const BookletLibrary: React.FC<BookletLibraryProps> = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-70" />
 
                   {/* Badges Overlay */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                    <span
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${
-                        isStudent
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                          : 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
-                      }`}
-                    >
+                  <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center gap-1">
+                    <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded sm:rounded-lg text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/40 backdrop-blur-md">
                       {isStudent ? 'Students AI' : 'Teachers AI'}
                     </span>
                   </div>
 
-                  <div className="absolute top-3 right-3">
-                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-mono text-zinc-400 bg-black/85 backdrop-blur-md border border-zinc-800">
+                  <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
+                    <span className="px-1.5 py-0.5 rounded sm:rounded-lg text-[8px] sm:text-[10px] font-mono text-emerald-400 bg-black backdrop-blur-md border border-zinc-800">
                       v{booklet.version}
                     </span>
                   </div>
 
-                  <div className="absolute bottom-3 right-3">
-                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-white bg-black/85 backdrop-blur-md border border-zinc-800 flex items-center space-x-1.5">
-                      <FileText className="w-3 h-3 text-emerald-400" />
-                      <span>{booklet.totalPages} Pages</span>
+                  <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3">
+                    <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded sm:rounded-lg text-[9px] sm:text-[11px] font-semibold text-emerald-400 bg-black backdrop-blur-md border border-zinc-800 flex items-center space-x-1 sm:space-x-1.5">
+                      <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400" />
+                      <span className="text-emerald-400">{booklet.totalPages} Pgs</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Card Info Body */}
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div className="mb-4">
-                    <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors line-clamp-1 mb-1.5">
+                <div className="p-2.5 sm:p-5 flex-1 flex flex-col justify-between">
+                  <div className="mb-2 sm:mb-4">
+                    <h3 className="text-xs sm:text-base font-bold text-white group-hover:text-emerald-400 transition-colors line-clamp-1 mb-1 sm:mb-1.5">
                       {booklet.title}
                     </h3>
-                    <p className="text-zinc-400 text-xs line-clamp-2 leading-relaxed">
+                    <p className="text-zinc-400 text-[10px] sm:text-xs line-clamp-2 leading-tight sm:leading-relaxed">
                       {booklet.shortDescription}
                     </p>
                   </div>
 
                   {/* Read Booklet Action Button (Non-pill, rounded-lg) */}
                   <button
-                    className="w-full py-2.5 px-4 rounded-lg bg-zinc-900 group-hover:bg-emerald-400 text-zinc-300 group-hover:text-black font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center space-x-2"
+                    className="w-full py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-md sm:rounded-lg bg-zinc-900 group-hover:bg-emerald-400 text-zinc-300 group-hover:text-black font-bold text-[10px] sm:text-xs uppercase tracking-wider transition-colors flex items-center justify-center space-x-1 sm:space-x-2"
                   >
                     <span>Read Module</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
               </div>
