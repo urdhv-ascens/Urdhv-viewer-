@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { AdSlide } from '../types';
-import { ExternalLink, X } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 interface MobileTopAdBannerProps {
   slides: AdSlide[];
@@ -14,19 +14,18 @@ export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
   const activeSlides = slides.filter(s => s.active !== false && s.imageUrl);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
-    if (activeSlides.length <= 1 || isPaused || isDismissed) return;
+    if (activeSlides.length <= 1 || isPaused) return;
 
     const timer = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % activeSlides.length);
     }, rotationIntervalSeconds * 1000);
 
     return () => clearInterval(timer);
-  }, [activeSlides.length, isPaused, isDismissed, rotationIntervalSeconds]);
+  }, [activeSlides.length, isPaused, rotationIntervalSeconds]);
 
-  if (isDismissed || activeSlides.length === 0) return null;
+  if (activeSlides.length === 0) return null;
 
   const currentSlide = activeSlides[currentIndex % activeSlides.length];
 
@@ -35,7 +34,7 @@ export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
       aria-label="Mobile Sponsor Announcement Bar"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="block lg:hidden w-full px-2 sm:px-4 py-1.5 z-30 bg-black/90 border-b border-zinc-850"
+      className="block lg:hidden w-full px-2 sm:px-4 py-1.5 z-30 bg-black border-b border-zinc-850"
     >
       <div className="relative w-full max-w-xl mx-auto h-16 sm:h-20 rounded-xl overflow-hidden border border-zinc-850 bg-zinc-950 group">
         <a
@@ -59,7 +58,7 @@ export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
 
           {/* SPONSORED Tag Overlay */}
           <div className="absolute top-2 left-2 flex items-center space-x-1.5">
-            <span className="px-2 py-0.5 rounded-md text-[8px] sm:text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+            <span className="px-2 py-0.5 rounded-md text-[8px] sm:text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30">
               SPONSORED
             </span>
           </div>
@@ -74,24 +73,11 @@ export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
           )}
 
           {/* Action indicator on Right */}
-          <div className="absolute bottom-2 right-2 flex items-center space-x-1 px-2 py-1 rounded bg-black/80 border border-zinc-800 text-[10px] font-semibold text-emerald-400">
+          <div className="absolute bottom-2 right-2 flex items-center space-x-1 px-2 py-1 rounded bg-black border border-zinc-800 text-[10px] font-semibold text-emerald-400">
             <span>Open</span>
             <ExternalLink className="w-2.5 h-2.5" />
           </div>
         </a>
-
-        {/* Dismiss button */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsDismissed(true);
-          }}
-          aria-label="Dismiss banner"
-          className="absolute top-2 right-2 p-1 rounded-md bg-black/80 text-zinc-500 hover:text-white border border-zinc-800 transition-colors z-20"
-        >
-          <X className="w-3 h-3" />
-        </button>
 
         {/* Carousel indicators */}
         {activeSlides.length > 1 && (

@@ -80,7 +80,7 @@ export function App() {
       )}
 
       {/* Main Studio Navigation Header */}
-      <header className="sticky top-0 z-30 bg-black/95 border-b border-zinc-850 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-black border-b border-zinc-850 px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <a href="https://urdhvascens.com" className="flex items-center gap-2.5 group">
             <img src="/logo.png" alt="Ūrdhv Ascens" className="h-7 w-auto object-contain transition-transform group-hover:scale-105" />

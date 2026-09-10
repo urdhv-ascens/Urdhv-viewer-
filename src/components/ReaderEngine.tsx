@@ -155,7 +155,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
       className="fixed inset-0 z-50 flex flex-col bg-black text-white select-none overflow-hidden"
     >
       {/* Top Reading Navigation Bar */}
-      <header className="h-14 bg-zinc-950/90 border-b border-zinc-800/80 px-4 flex items-center justify-between z-20 backdrop-blur-md">
+      <header className="h-14 bg-zinc-950 border-b border-zinc-800 px-4 flex items-center justify-between z-20">
         {/* Left: Back & Title */}
         <div className="flex items-center space-x-3 truncate">
           <button
@@ -292,7 +292,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         {/* Central Canvas Reading Area */}
         <div className="flex-1 flex flex-col items-center justify-center relative min-w-0 h-full">
           {loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/60 backdrop-blur-sm z-30">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 z-30">
               <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
               <p className="text-xs text-zinc-400 font-mono">Rendering high-res page {currentPage}...</p>
             </div>
@@ -324,7 +324,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             onClick={goToPrev}
             disabled={currentPage <= 1}
             aria-label="Previous Page"
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -333,7 +333,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             onClick={goToNext}
             disabled={currentPage >= booklet.totalPages}
             aria-label="Next Page"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 text-zinc-300 backdrop-blur-md border border-zinc-800/80 disabled:hidden transition-colors z-10"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

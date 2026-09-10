@@ -195,19 +195,19 @@ export const BookletLibrary: React.FC<BookletLibraryProps> = ({
 
                   {/* Badges Overlay */}
                   <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center gap-1">
-                    <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded sm:rounded-lg text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/40 backdrop-blur-md">
+                    <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded sm:rounded-lg text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/40">
                       {isStudent ? 'Students AI' : 'Teachers AI'}
                     </span>
                   </div>
 
                   <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                    <span className="px-1.5 py-0.5 rounded sm:rounded-lg text-[8px] sm:text-[10px] font-mono text-emerald-400 bg-black backdrop-blur-md border border-zinc-800">
+                    <span className="px-1.5 py-0.5 rounded sm:rounded-lg text-[8px] sm:text-[10px] font-mono text-emerald-400 bg-black border border-zinc-800">
                       v{booklet.version}
                     </span>
                   </div>
 
                   <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3">
-                    <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded sm:rounded-lg text-[9px] sm:text-[11px] font-semibold text-emerald-400 bg-black backdrop-blur-md border border-zinc-800 flex items-center space-x-1 sm:space-x-1.5">
+                    <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded sm:rounded-lg text-[9px] sm:text-[11px] font-semibold text-emerald-400 bg-black border border-zinc-800 flex items-center space-x-1 sm:space-x-1.5">
                       <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400" />
                       <span className="text-emerald-400">{booklet.totalPages} Pgs</span>
                     </span>
