@@ -96,7 +96,7 @@ export function App() {
         <header className="border-b border-zinc-850 px-3 sm:px-8 py-2.5 sm:py-3.5 flex items-center justify-between">
           <div className="flex items-center space-x-2.5 sm:space-x-3">
             <a href="https://urdhvascens.pages.dev" className="flex items-center gap-2 group">
-              <img src="/logo.png" alt="Ūrdhv Ascens" className="h-6 sm:h-7 w-auto object-contain transition-transform group-hover:scale-105" />
+              <img src="/logo.webp" alt="Ūrdhv Ascens" className="h-6 sm:h-7 w-auto object-contain transition-transform group-hover:scale-105" />
               <span className="text-sm sm:text-lg font-black tracking-widest text-white uppercase">
                 ŪRDHV <span className="text-emerald-400">ASCENS</span>
               </span>

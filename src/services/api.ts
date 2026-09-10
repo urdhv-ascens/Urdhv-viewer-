@@ -79,7 +79,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
         {
           id: 'default-side-01',
           title: 'Enterprise Digital Systems',
-          imageUrl: '/uploads/ad_side_1.png',
+          imageUrl: '/uploads/ad_side_1.webp',
           destinationUrl: 'https://urdhvascens.pages.dev#contact',
           alt: 'Ūrdhv Ascens Studio Engineering',
           active: true,
@@ -88,7 +88,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
         {
           id: 'default-side-02',
           title: 'Visual AI Curriculum',
-          imageUrl: '/uploads/ad_side_2.png',
+          imageUrl: '/uploads/ad_side_2.webp',
           destinationUrl: 'https://urdhvascens.pages.dev',
           alt: 'Visual AI Curriculum Modules',
           active: true,
@@ -97,13 +97,13 @@ export async function getAdsConfig(): Promise<AdsConfig> {
       ],
       leftAd: {
         enabled: true,
-        imageUrl: '/uploads/ad_side_1.png',
+        imageUrl: '/uploads/ad_side_1.webp',
         destinationUrl: 'https://urdhvascens.pages.dev#contact',
         alt: 'Ūrdhv Ascens Studio Partner'
       },
       rightAd: {
         enabled: true,
-        imageUrl: '/uploads/ad_side_2.png',
+        imageUrl: '/uploads/ad_side_2.webp',
         destinationUrl: 'https://urdhvascens.pages.dev',
         alt: 'Ūrdhv Ascens Studio Partner'
       }
@@ -115,7 +115,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
         {
           id: 'default-mob-01',
           title: 'Ūrdhv Ascens Studio Flagship',
-          imageUrl: '/uploads/ad_mobile_1.png',
+          imageUrl: '/uploads/ad_mobile_1.webp',
           destinationUrl: 'https://urdhvascens.pages.dev#contact',
           alt: 'Ūrdhv Ascens Studio',
           active: true,
@@ -124,7 +124,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
         {
           id: 'default-mob-02',
           title: 'Visual AI Curriculum Modules',
-          imageUrl: '/uploads/ad_mobile_2.png',
+          imageUrl: '/uploads/ad_mobile_2.webp',
           destinationUrl: 'https://urdhvascens.pages.dev',
           alt: 'Visual AI Educational Track',
           active: true,

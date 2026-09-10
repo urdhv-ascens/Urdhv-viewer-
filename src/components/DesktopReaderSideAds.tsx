@@ -14,16 +14,16 @@ const DEFAULT_READER_SIDE_SLIDES: AdSlide[] = [
     id: 'default-side-1',
     title: 'Enterprise Digital Systems',
     alt: 'Ūrdhv Ascens Studio Engineering',
-    destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
-    imageUrl: '/uploads/ad_side_1.png',
+    destinationUrl: 'https://urdhvascens.pages.dev#contact',
+    imageUrl: '/uploads/ad_side_1.webp',
     active: true
   },
   {
     id: 'default-side-2',
     title: 'Visual AI Curriculum',
     alt: '12 Interactive Visual Modules',
-    destinationUrl: 'https://gold-cat-133405.hostingersite.com',
-    imageUrl: '/uploads/ad_side_2.png',
+    destinationUrl: 'https://urdhvascens.pages.dev',
+    imageUrl: '/uploads/ad_side_2.webp',
     active: true
   }
 ];

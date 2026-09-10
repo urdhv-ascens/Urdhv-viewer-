@@ -17,7 +17,7 @@ const DEFAULT_SIDE_SLIDES: AdSlide[] = [
     title: 'Enterprise Digital Systems',
     alt: 'Ūrdhv Ascens Studio Engineering',
     destinationUrl: 'https://urdhvascens.pages.dev#contact',
-    imageUrl: '/uploads/ad_side_1.png',
+    imageUrl: '/uploads/ad_side_1.webp',
     active: true
   },
   {
@@ -25,7 +25,7 @@ const DEFAULT_SIDE_SLIDES: AdSlide[] = [
     title: 'Visual AI Curriculum',
     alt: '12 Interactive Visual Modules',
     destinationUrl: 'https://urdhvascens.pages.dev',
-    imageUrl: '/uploads/ad_side_2.png',
+    imageUrl: '/uploads/ad_side_2.webp',
     active: true
   }
 ];

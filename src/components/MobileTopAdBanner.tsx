@@ -13,7 +13,7 @@ const DEFAULT_SLIDES: AdSlide[] = [
     title: 'ŪRDHV ASCENS STUDIO',
     alt: 'Bespoke Digital Architecture & Flagships',
     destinationUrl: 'https://urdhvascens.pages.dev#contact',
-    imageUrl: '/uploads/ad_mobile_1.png',
+    imageUrl: '/uploads/ad_mobile_1.webp',
     active: true
   },
   {
@@ -21,7 +21,7 @@ const DEFAULT_SLIDES: AdSlide[] = [
     title: 'VISUAL AI CURRICULUM',
     alt: '12 Interactive Open-Access Modules',
     destinationUrl: 'https://urdhvascens.pages.dev',
-    imageUrl: '/uploads/ad_mobile_2.png',
+    imageUrl: '/uploads/ad_mobile_2.webp',
     active: true
   }
 ];
