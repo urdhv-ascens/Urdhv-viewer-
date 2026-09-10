@@ -12,12 +12,10 @@
 ```
 urdhv-ascens/
 ├── apps/
-│   ├── main-site/                 # Next.js 16 (Turbopack, App Router)
+│   ├── main-site/                 # Next.js 16 (App Router) Storefront & Admin CMS
 │   │   ├── src/app/               # Public routes (/, /terms, /privacy, etc.)
 │   │   │   └── admin/             # Full CMS Suite (/admin, /admin/projects, /admin/ads, etc.)
 │   │   ├── src/components/        # UI components (Hero, About, Infinite Carousels, etc.)
-│   │   ├── firestore.rules        # Production Firestore Row-Level Security Rules
-│   │   ├── storage.rules          # Firebase Storage Security Rules
 │   │   └── .env.example           # Environment template (keys kept out of git)
 │   │
 │   └── viewer/                    # Vite + React 18 + TypeScript Reader SPA
@@ -25,30 +23,24 @@ urdhv-ascens/
 │       ├── public/                # _redirects (SPA fallback), _headers (CORS & Security)
 │       └── .env.example           # Viewer environment template
 │
-├── urdhvascens/                   # Hostinger / cPanel Deployment Root
-│   ├── api/                       # Hardened PHP 7.4+ Backend Endpoints
-│   │   ├── config.php             # Rate limiter, timing-safe auth, CORS headers
-│   │   ├── auth.php               # Admin login/logout with brute-force lockout
-│   │   ├── content.php            # Storefront CMS data endpoint with flock write locks
-│   │   ├── booklets.php           # Curriculum catalog & CDN endpoint
-│   │   ├── ads.php                # Desktop side ads & mobile top banner endpoint
-│   │   ├── courses.php            # Course registration endpoint
-│   │   ├── readers.php            # Lead capture & reader tracking endpoint
-│   │   ├── upload.php             # Strict MIME/extension media uploader
-│   │   └── data/                  # Flat-file JSON data storage (protected)
-│   ├── uploads/                   # Media directory (.htaccess denies script execution)
-│   └── index.html                 # Compiled static production bundle of main-site
+├── urdhv-ascens-admin/            # Hostinger / cPanel Admin CMS & PHP API Gateway
+│   ├── public_html/               # Production deployment directory
+│   │   ├── api/                   # PHP 7.4+ API endpoints (ads, auth, booklets, content, etc.)
+│   │   ├── uploads/               # Media uploads with strict MIME verification
+│   │   └── admin/                 # Static admin dashboard
+│   ├── backend/                   # Synchronized PHP API Gateway source
+│   └── index.php                  # Root gateway handler
 │
-├── cloudflare CDN booklets/       # Cloudflare Pages / R2 CDN documentation and tools
-│   ├── architecture-change.md     # Booklet CDN architecture specification
-│   └── deployed-pages.md          # 12 live Cloudflare Pages booklet module domains
+├── packages/
+│   └── booklets/                  # 12 Processed WebP Curriculum Modules
+│
+├── contracts/
+│   └── types.ts                   # Universal TypeScript data contracts & schemas
 │
 ├── tools/
 │   └── local-dev-server.mjs       # Standalone Node API server (simulates PHP API on port 8080)
 │
-├── visual-changes.md              # Master design system specifications & constraints
-├── HANDOFF.md                     # Agent handoff & context preservation document
-└── README.md                      # This comprehensive master manual
+└── README.md                      # Platform documentation
 ```
 
 ---
@@ -76,19 +68,19 @@ Every security vulnerability vector across both client applications and server e
 | # | Security Control | Implementation Details |
 | :---: | :--- | :--- |
 | **1** | **Hide API Keys** | All API secrets, tokens, and credentials are exclusively injected via environment variables (`.env.local`). Clean `.env.example` templates provided. `.env*` files are strictly ignored in `.gitignore`. |
-| **2** | **Enable RLS (Row-Level Security)** | Implemented in [`apps/main-site/firestore.rules`](file:///c:/Users/D.Solanki/urdhv-ascens/apps/main-site/firestore.rules). Public can read approved records; write/modify operations require authenticated admin privileges; reader profiles isolated to record owners. |
-| **3** | **Test IDOR Attacks** | In `readers.php` and `firestore.rules`, records cannot be modified or retrieved via sequential ID guessing. Updates validate session tokens and owner ownership. |
+| **2** | **Role-Based Access Control** | Public can read approved records; write/modify operations require authenticated admin privileges; reader profiles isolated to record owners. |
+| **3** | **Test IDOR Attacks** | In `readers.php`, records cannot be modified or retrieved via sequential ID guessing. Updates validate session tokens and owner ownership. |
 | **4** | **Scan GIT Secrets** | Working tree and commit history sanitized of private tokens, service account credentials, and passwords. |
-| **5** | **Lock Admin Routes** | Protected by [`AdminAuthGuard.tsx`](file:///c:/Users/D.Solanki/urdhv-ascens/apps/main-site/src/components/admin/AdminAuthGuard.tsx). Unauthenticated users accessing `/admin/*` are intercepted and redirected to `/admin/login`. |
+| **5** | **Lock Admin Routes** | Protected by [`AdminAuthGuard.tsx`](apps/main-site/src/components/admin/AdminAuthGuard.tsx). Unauthenticated users accessing `/admin/*` are intercepted and redirected to `/admin/login`. |
 | **6** | **Test User Isolation** | Reader profile data and progress state are bound to session tokens or owner user IDs; no cross-account leakage. |
-| **7** | **Rate Limit APIs** | Built-in IP rate limiter in [`urdhvascens/api/config.php`](file:///c:/Users/D.Solanki/urdhv-ascens/urdhvascens/api/config.php#L77-L113) (max 180 requests/min per IP with SHA-256 IP hashing) and brute-force throttling in `auth.php` (lockout on failed attempts). |
-| **8** | **Lock Storage Buckets** | Covered by [`apps/main-site/storage.rules`](file:///c:/Users/D.Solanki/urdhv-ascens/apps/main-site/storage.rules) and [`urdhvascens/uploads/.htaccess`](file:///c:/Users/D.Solanki/urdhv-ascens/urdhvascens/uploads/.htaccess). Apache/PHP execution engine is explicitly disabled inside `uploads/` (`php_flag engine off`), completely preventing Remote Code Execution (RCE). |
+| **7** | **Rate Limit APIs** | Built-in IP rate limiter in [`urdhv-ascens-admin/public_html/api/config.php`](urdhv-ascens-admin/public_html/api/config.php) (max 180 requests/min per IP with SHA-256 IP hashing) and brute-force throttling in `auth.php` (lockout on failed attempts). |
+| **8** | **Lock Storage Buckets** | Protected by [`urdhv-ascens-admin/public_html/uploads/.htaccess`](urdhv-ascens-admin/public_html/uploads/.htaccess). Apache/PHP execution engine is explicitly disabled inside `uploads/` (`php_flag engine off`), completely preventing Remote Code Execution (RCE). |
 | **9** | **Validate All Inputs** | POST payloads across `content.php`, `booklets.php`, and `ads.php` undergo strict JSON decoding and type checks. |
 | **10** | **Block Unauthenticated Routes** | All write/save operations (`POST`, `DELETE`) on the API gateway require valid `X-Admin-Key` header, `Authorization: Bearer <token>`, or active session token. |
-| **11** | **Test SQL Injection** | Data persistence utilizes atomic JSON transactions and Firestore documents, eliminating SQL injection surfaces. Input strings are sanitized against path traversal (`../`). |
+| **11** | **Prevent Injection Attacks** | Data persistence utilizes atomic JSON transactions and strict data sanitization. Input strings are sanitized against path traversal (`../`). |
 | **12** | **Remove Sensitive Logs** | Client bundles stripped of debugging credentials, token dumps, or internal stack traces. |
 | **13** | **Block Field Tampering** | API updates validate incoming schemas against permitted field whitelists before saving to disk. |
-| **14** | **Restrict File Uploads** | [`upload.php`](file:///c:/Users/D.Solanki/urdhv-ascens/urdhvascens/api/upload.php#L33-L77) uses `finfo_file` for true MIME-type inspection. Rejects SVGs (preventing Stored XSS). Renames files with high-entropy cryptographic hashes (`bin2hex(random_bytes(6))`). |
+| **14** | **Restrict File Uploads** | [`urdhv-ascens-admin/public_html/api/upload.php`](urdhv-ascens-admin/public_html/api/upload.php) uses `finfo_file` for true MIME-type inspection. Rejects SVGs (preventing Stored XSS). Renames files with high-entropy cryptographic hashes (`bin2hex(random_bytes(6))`). |
 | **15** | **Secure Server Logic** | All permissions and rate limits are enforced server-side in PHP/Node, not merely bypassed on the frontend. |
 | **16** | **Trim API Responses** | Password hashes, session file system paths, and internal server paths are never returned to client endpoints. |
 | **17** | **Secure Auth Sessions** | High-entropy 48-character hex session tokens (`bin2hex(random_bytes(24))`) with 24-hour expiration (`SESSION_LIFETIME = 86400`) and instant revocation on logout. |
@@ -168,22 +160,18 @@ npm run dev
 
 ### Option A: Deployment to Hostinger (cPanel / Apache / PHP)
 
-The `urdhvascens/` directory is an all-in-one pre-compiled deployment package ready to be uploaded directly to Hostinger:
+The `urdhv-ascens-admin/public_html/` directory is an all-in-one pre-compiled deployment package deployed to Hostinger:
 
 1. **Build the Main Site**:
    ```powershell
    cd apps/main-site
    npm run build
    ```
-   *This automatically hydrates CMS data and exports 22 static pages into `apps/main-site/out/`.*
+   *This automatically hydrates CMS data and exports static pages into `apps/main-site/out/`.*
 
-2. **Sync Compiled Files to `urdhvascens/`**:
-   ```powershell
-   node -e "const fs = require('fs'), path = require('path'); function c(s,d){if(!fs.existsSync(d))fs.mkdirSync(d,{recursive:true});for(const i of fs.readdirSync(s)){if(i==='api')continue;const sp=path.join(s,i),dp=path.join(d,i);fs.statSync(sp).isDirectory()?c(sp,dp):fs.copyFileSync(sp,dp);}} c('apps/main-site/out','urdhvascens'); console.log('Synced!');"
-   ```
-
-3. **Upload via FTP / cPanel File Manager**:
-   - Upload the **entire contents of `urdhvascens/`** to your Hostinger `public_html/` directory.
+2. **Sync Compiled Static Files to Hostinger Web Root**:
+   - The compiled static site and PHP API reside in `urdhv-ascens-admin/public_html/`.
+   - Any updates pushed to the `urdhv-ascens-admin` Git repository trigger automated synchronization to Hostinger.
    - Verify folder permissions:
      - `public_html/api/data/` -> `0755` (or `0775` if writable by web server)
      - `public_html/uploads/` -> `0755`
