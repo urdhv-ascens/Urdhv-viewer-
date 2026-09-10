@@ -5,7 +5,7 @@
 
 import type { Booklet, BookletManifest, AdsConfig } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://urdhvascens.com/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://gold-cat-133405.hostingersite.com/api';
 
 /**
  * Fetch booklet catalog from Hostinger API with local static fallback
@@ -61,7 +61,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
           id: 'default-01',
           title: 'ŪRDHV ASCENS STUDIO — Bespoke Digital Solutions',
           subtitle: 'Precision Engineered. Distinctly Elevated.',
-          destinationUrl: 'https://urdhvascens.com',
+          destinationUrl: 'https://gold-cat-133405.hostingersite.com',
           active: true,
           displayOrder: 1
         }

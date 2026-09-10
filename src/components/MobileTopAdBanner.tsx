@@ -38,7 +38,7 @@ export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
     >
       <div className="relative w-full max-w-xl mx-auto h-16 sm:h-20 rounded-xl overflow-hidden border border-zinc-850 bg-zinc-950 group">
         <a
-          href={currentSlide.destinationUrl || 'https://urdhvascens.com'}
+          href={currentSlide.destinationUrl || 'https://gold-cat-133405.hostingersite.com'}
           target="_blank"
           rel="noopener noreferrer"
           className="relative w-full h-full block"

@@ -58,7 +58,7 @@ export const DesktopReaderSideAds: React.FC<DesktopReaderSideAdsProps> = ({
       className="hidden lg:flex flex-col items-center justify-center w-36 xl:w-44 2xl:w-52 h-[75vh] max-h-[680px] flex-shrink-0 z-20 select-none group"
     >
       <a
-        href={currentSlide.destinationUrl || 'https://urdhvascens.com'}
+        href={currentSlide.destinationUrl || 'https://gold-cat-133405.hostingersite.com'}
         target="_blank"
         rel="noopener noreferrer"
         className="relative w-full h-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between p-2 shadow-2xl block"

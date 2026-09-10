@@ -71,7 +71,7 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
         className="hidden 2xl:block fixed left-4 top-24 bottom-24 w-44 z-30 pointer-events-auto select-none"
       >
         <a
-          href={leftSlide.destinationUrl || 'https://urdhvascens.com'}
+          href={leftSlide.destinationUrl || 'https://gold-cat-133405.hostingersite.com'}
           target="_blank"
           rel="noopener noreferrer"
           className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"
@@ -112,7 +112,7 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
         className="hidden 2xl:block fixed right-4 top-24 bottom-24 w-44 z-30 pointer-events-auto select-none"
       >
         <a
-          href={rightSlide.destinationUrl || 'https://urdhvascens.com'}
+          href={rightSlide.destinationUrl || 'https://gold-cat-133405.hostingersite.com'}
           target="_blank"
           rel="noopener noreferrer"
           className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"

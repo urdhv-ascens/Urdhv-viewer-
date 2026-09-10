@@ -82,7 +82,7 @@ export function App() {
       {/* Main Studio Navigation Header */}
       <header className="sticky top-0 z-30 bg-black border-b border-zinc-850 px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <a href="https://urdhvascens.com" className="flex items-center gap-2.5 group">
+          <a href="https://gold-cat-133405.hostingersite.com" className="flex items-center gap-2.5 group">
             <img src="/logo.png" alt="Ūrdhv Ascens" className="h-7 w-auto object-contain transition-transform group-hover:scale-105" />
             <span className="text-base sm:text-lg font-black tracking-widest text-white uppercase">
               ŪRDHV <span className="text-emerald-400">ASCENS</span>
@@ -94,7 +94,7 @@ export function App() {
         </div>
 
         <a
-          href="https://urdhvascens.com"
+          href="https://gold-cat-133405.hostingersite.com"
           className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
         >
           <span>Studio Flagship</span>
