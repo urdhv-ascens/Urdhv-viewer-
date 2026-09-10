@@ -9,6 +9,25 @@ interface DesktopReaderSideAdsProps {
   rotationIntervalSeconds?: number;
 }
 
+const DEFAULT_READER_SIDE_SLIDES: AdSlide[] = [
+  {
+    id: 'default-side-1',
+    title: 'Enterprise Digital Systems',
+    alt: 'Ūrdhv Ascens Studio Engineering',
+    destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+    imageUrl: '/uploads/ad_side_1.png',
+    active: true
+  },
+  {
+    id: 'default-side-2',
+    title: 'Visual AI Curriculum',
+    alt: '12 Interactive Visual Modules',
+    destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+    imageUrl: '/uploads/ad_side_2.png',
+    active: true
+  }
+];
+
 export const DesktopReaderSideAds: React.FC<DesktopReaderSideAdsProps> = ({
   position,
   slides = [],
@@ -19,20 +38,21 @@ export const DesktopReaderSideAds: React.FC<DesktopReaderSideAdsProps> = ({
   const pool: AdSlide[] = [];
   if (slides && slides.length > 0) {
     slides.forEach(s => {
-      if (s.active !== false && s.imageUrl) pool.push(s);
+      if (s.active !== false) pool.push(s);
     });
   }
-  if (pool.length === 0 && placement && placement.enabled && placement.imageUrl) {
+  if (pool.length === 0 && placement && placement.enabled !== false && placement.imageUrl) {
     pool.push({
       id: `side-${position}-default`,
       imageUrl: placement.imageUrl,
       destinationUrl: placement.destinationUrl,
-      alt: placement.alt,
+      alt: placement.alt || 'Partner sponsor',
+      title: placement.alt || 'Partner sponsor',
       active: true
     });
   }
 
-  const activeSlides = pool;
+  const activeSlides = pool.length > 0 ? pool : DEFAULT_READER_SIDE_SLIDES;
   const [currentIndex, setCurrentIndex] = useState(position === 'right' && activeSlides.length > 1 ? 1 : 0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -45,8 +65,6 @@ export const DesktopReaderSideAds: React.FC<DesktopReaderSideAdsProps> = ({
 
     return () => clearInterval(timer);
   }, [activeSlides.length, isPaused, rotationIntervalSeconds]);
-
-  if (activeSlides.length === 0) return null;
 
   const currentSlide = activeSlides[currentIndex % activeSlides.length];
 
@@ -61,7 +79,7 @@ export const DesktopReaderSideAds: React.FC<DesktopReaderSideAdsProps> = ({
         href={currentSlide.destinationUrl || 'https://gold-cat-133405.hostingersite.com'}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative w-full h-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between p-2 shadow-2xl block"
+        className="relative w-full h-full rounded-2xl overflow-hidden border border-zinc-850 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between p-2.5 shadow-2xl block"
       >
         {/* Top Header Badge */}
         <div className="flex items-center justify-between px-1 pt-1 z-10">
@@ -75,16 +93,18 @@ export const DesktopReaderSideAds: React.FC<DesktopReaderSideAdsProps> = ({
 
         {/* Ad Image Container with Auto-Slideshow */}
         <div className="relative flex-1 w-full my-2 rounded-xl overflow-hidden bg-zinc-900 flex items-center justify-center">
-          <img
-            key={currentSlide.id || currentIndex}
-            src={currentSlide.imageUrl}
-            alt={currentSlide.alt || currentSlide.title || 'Partner sponsor'}
-            loading="lazy"
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/uploads/ad_side_1.png';
-            }}
-          />
+          {currentSlide.imageUrl && (
+            <img
+              key={currentSlide.id || currentIndex}
+              src={currentSlide.imageUrl}
+              alt={currentSlide.alt || currentSlide.title || 'Partner sponsor'}
+              loading="lazy"
+              className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
         </div>
 

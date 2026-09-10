@@ -68,16 +68,64 @@ export async function getAdsConfig(): Promise<AdsConfig> {
       ]
     },
     sideAds: {
-      enabled: false,
+      enabled: true,
       rotationIntervalSeconds: 5,
-      slides: [],
-      leftAd: { enabled: false, imageUrl: '', destinationUrl: '', alt: '' },
-      rightAd: { enabled: false, imageUrl: '', destinationUrl: '', alt: '' }
+      slides: [
+        {
+          id: 'default-side-01',
+          title: 'Enterprise Digital Systems',
+          imageUrl: '/uploads/ad_side_1.png',
+          destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+          alt: 'Ūrdhv Ascens Studio Engineering',
+          active: true,
+          displayOrder: 1
+        },
+        {
+          id: 'default-side-02',
+          title: 'Visual AI Curriculum',
+          imageUrl: '/uploads/ad_side_2.png',
+          destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+          alt: 'Visual AI Curriculum Modules',
+          active: true,
+          displayOrder: 2
+        }
+      ],
+      leftAd: {
+        enabled: true,
+        imageUrl: '/uploads/ad_side_1.png',
+        destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+        alt: 'Ūrdhv Ascens Studio Partner'
+      },
+      rightAd: {
+        enabled: true,
+        imageUrl: '/uploads/ad_side_2.png',
+        destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+        alt: 'Ūrdhv Ascens Studio Partner'
+      }
     },
     mobileBanner: {
-      enabled: false,
+      enabled: true,
       rotationIntervalSeconds: 5,
-      slides: []
+      slides: [
+        {
+          id: 'default-mob-01',
+          title: 'Ūrdhv Ascens Studio Flagship',
+          imageUrl: '/uploads/ad_mobile_1.png',
+          destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+          alt: 'Ūrdhv Ascens Studio',
+          active: true,
+          displayOrder: 1
+        },
+        {
+          id: 'default-mob-02',
+          title: 'Visual AI Curriculum Modules',
+          imageUrl: '/uploads/ad_mobile_2.png',
+          destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+          alt: 'Visual AI Educational Track',
+          active: true,
+          displayOrder: 2
+        }
+      ]
     }
   };
 }

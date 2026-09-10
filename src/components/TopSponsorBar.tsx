@@ -7,14 +7,26 @@ interface TopSponsorBarProps {
   rotationIntervalSeconds?: number;
 }
 
+const DEFAULT_TOP_SLIDES: TopBarSlide[] = [
+  {
+    id: 'default-top-01',
+    title: 'ŪRDHV ASCENS STUDIO — Bespoke Digital Solutions & Architecture',
+    subtitle: 'Accepting select high-impact projects for 2026',
+    destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+    active: true,
+    displayOrder: 1
+  }
+];
+
 export const TopSponsorBar: React.FC<TopSponsorBarProps> = ({
-  slides,
+  slides = [],
   rotationIntervalSeconds = 6
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const activeSlides = slides.filter(s => s.active);
+  const filtered = slides.filter(s => s.active !== false);
+  const activeSlides = filtered.length > 0 ? filtered : DEFAULT_TOP_SLIDES;
 
   useEffect(() => {
     if (activeSlides.length <= 1 || isPaused) return;
@@ -26,9 +38,7 @@ export const TopSponsorBar: React.FC<TopSponsorBarProps> = ({
     return () => clearInterval(timer);
   }, [activeSlides.length, isPaused, rotationIntervalSeconds]);
 
-  if (activeSlides.length === 0) return null;
-
-  const currentSlide = activeSlides[currentIndex];
+  const currentSlide = activeSlides[currentIndex % activeSlides.length];
 
   return (
     <aside

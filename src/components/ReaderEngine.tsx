@@ -37,6 +37,32 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Touch swipe handling for mobile
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const diffX = touchStartX.current - e.changedTouches[0].clientX;
+    const diffY = touchStartY.current - e.changedTouches[0].clientY;
+
+    // Horizontal swipe threshold: 50px and horizontally dominant
+    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+      if (diffX > 0) {
+        goToNext();
+      } else {
+        goToPrev();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   // Hook for bounded LRU cache and smart prefetching
   const { loading, error, renderToCanvas, retry } = usePageLoader(booklet, currentPage);
 
@@ -52,10 +78,10 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
     }
   }, [loading, error, renderToCanvas, zoomLevel]);
 
-  // Keyboard navigation & anti-piracy shortcut blocker (Spec §5.6)
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Anti-piracy blocker for standard save/print/view-source shortcuts
+      // Standard shortcut prevention
       if (
         (e.ctrlKey || e.metaKey) &&
         (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P' || e.key === 'u' || e.key === 'U')
@@ -152,7 +178,9 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
     <div
       ref={containerRef}
       onContextMenu={(e) => e.preventDefault()}
-      className="fixed inset-0 z-50 flex flex-col bg-black text-white select-none overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="fixed inset-0 z-50 flex flex-col bg-black text-white select-none overflow-hidden h-[100dvh] w-full"
     >
       {/* Top Reading Navigation Bar */}
       <header className="h-14 bg-zinc-950 border-b border-zinc-800 px-4 flex items-center justify-between z-20">
@@ -269,16 +297,16 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         </div>
       </header>
 
-      {/* Mobile Top Ad Banner (Thick image bar for ads on mobile) */}
-      {ads?.mobileBanner?.enabled && ads.mobileBanner.slides && ads.mobileBanner.slides.length > 0 && (
+      {/* Mobile Top Ad Banner */}
+      {ads?.mobileBanner?.enabled !== false && (
         <MobileTopAdBanner
-          slides={ads.mobileBanner.slides}
-          rotationIntervalSeconds={ads.mobileBanner.rotationIntervalSeconds || 5}
+          slides={ads?.mobileBanner?.slides || []}
+          rotationIntervalSeconds={ads?.mobileBanner?.rotationIntervalSeconds || 5}
         />
       )}
 
-      {/* Main Canvas Reading Viewport */}
-      <main className="flex-1 relative overflow-auto flex items-center justify-between p-2 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container gap-4">
+      {/* Main Canvas Reading Viewport - Scrollable vertically for comfortable reading */}
+      <main className="flex-1 relative overflow-y-auto overflow-x-hidden flex items-start sm:items-center justify-between p-2 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container gap-4 touch-pan-y">
         {/* Left Side Ad Banner (Desktop) */}
         {ads?.sideAds?.enabled && (
           <DesktopReaderSideAds
@@ -290,41 +318,41 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         )}
 
         {/* Central Canvas Reading Area */}
-        <div className="flex-1 flex flex-col items-center justify-center relative min-w-0 h-full">
+        <div className="flex-1 flex flex-col items-center justify-start sm:justify-center relative min-w-0 w-full py-2 sm:py-0">
           {loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 z-30">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 z-30 rounded-lg min-h-[300px]">
               <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
-              <p className="text-xs text-zinc-400 font-mono">Rendering high-res page {currentPage}...</p>
+              <p className="text-xs text-zinc-400 font-mono">Loading page {currentPage}...</p>
             </div>
           )}
 
           {error ? (
-            <div className="max-w-md p-6 bg-zinc-900 border border-red-500/30 rounded-2xl text-center z-30 shadow-2xl">
+            <div className="max-w-md p-6 bg-zinc-900 border border-red-500/30 rounded-2xl text-center z-30 shadow-2xl my-auto">
               <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-white mb-2">Page Delivery Failed</h3>
+              <h3 className="text-base font-bold text-white mb-2">Page Unavailable</h3>
               <p className="text-xs text-zinc-400 mb-4">{error}</p>
               <button
                 onClick={retry}
                 className="px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-black font-bold text-xs uppercase tracking-wider rounded-lg transition-colors"
               >
-                Retry Loading Page
+                Retry
               </button>
             </div>
           ) : (
-            <div className="relative inline-block transition-transform duration-100 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900">
+            <div className="relative inline-block transition-transform duration-100 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900 my-auto">
               <canvas
                 ref={canvasRef}
-                className="max-w-full max-h-[82vh] h-auto object-contain block"
+                className="w-full max-w-[98vw] sm:max-w-full sm:max-h-[82vh] h-auto object-contain block"
               />
             </div>
           )}
 
-          {/* Large Floating Touch Arrows on mobile/tablet */}
+          {/* Desktop/Tablet Floating Navigation Arrows - Hidden on mobile so canvas text is NEVER blocked */}
           <button
             onClick={goToPrev}
             disabled={currentPage <= 1}
             aria-label="Previous Page"
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10"
+            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/90 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10 shadow-lg"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -333,7 +361,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             onClick={goToNext}
             disabled={currentPage >= booklet.totalPages}
             aria-label="Next Page"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10"
+            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/90 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10 shadow-lg"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -350,11 +378,57 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         )}
       </main>
 
+      {/* Dedicated Mobile Bottom Navigation Bar (Buttons never overlap reading canvas) */}
+      <div className="sm:hidden bg-zinc-950 border-t border-zinc-850 px-3 py-2 flex items-center justify-between z-30 shrink-0">
+        <button
+          onClick={goToPrev}
+          disabled={currentPage <= 1}
+          className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-850 active:bg-zinc-800 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed border border-zinc-800 text-xs font-semibold"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Prev</span>
+        </button>
+
+        <div className="flex items-center space-x-2">
+          <form onSubmit={handlePageJump} className="flex items-center space-x-1">
+            <input
+              type="text"
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onBlur={() => setPageInput(String(currentPage))}
+              className="w-10 bg-zinc-900 border border-zinc-700 rounded-md text-center py-1 text-xs font-mono text-white focus:outline-none focus:border-emerald-400"
+            />
+            <span className="text-xs text-zinc-400 font-mono">/ {booklet.totalPages}</span>
+          </form>
+
+          <button
+            onClick={() => setShowThumbnails(!showThumbnails)}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              showThumbnails
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                : 'bg-zinc-900 text-zinc-400 border-zinc-800'
+            }`}
+            title="Toggle Thumbnails"
+          >
+            <Layers className="w-4 h-4" />
+          </button>
+        </div>
+
+        <button
+          onClick={goToNext}
+          disabled={currentPage >= booklet.totalPages}
+          className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-850 active:bg-zinc-800 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed border border-zinc-800 text-xs font-semibold"
+        >
+          <span>Next</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* Bottom Thumbnail Filmstrip Drawer */}
       {showThumbnails && (
         <aside
           aria-label="Page thumbnails filmstrip"
-          className="h-28 sm:h-32 bg-zinc-950 border-t border-zinc-800 px-4 py-2 flex items-center space-x-3 overflow-x-auto z-20"
+          className="h-28 sm:h-32 bg-zinc-950 border-t border-zinc-800 px-4 py-2 flex items-center space-x-3 overflow-x-auto z-20 shrink-0"
         >
           {Array.from({ length: booklet.totalPages }, (_, i) => i + 1).map((pageNum) => (
             <button
@@ -387,16 +461,16 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
       )}
 
       {/* Footer Status Bar */}
-      <footer className="h-7 bg-zinc-950 border-t border-zinc-900 px-4 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+      <footer className="h-7 bg-zinc-950 border-t border-zinc-900 px-4 flex items-center justify-between text-[10px] text-zinc-500 font-mono shrink-0">
         <div className="flex items-center space-x-2">
-          <span>ŪRDHV ASCENS HARDENED VIEWER</span>
+          <span>ŪRDHV ASCENS READER</span>
           <span>•</span>
           <span className="text-zinc-400">Page {currentPage} of {booklet.totalPages}</span>
         </div>
         <div className="hidden sm:flex items-center space-x-4">
-          <span>Use Arrow Keys to Navigate</span>
+          <span>Swipe or Arrow Keys to Navigate</span>
           <span>•</span>
-          <span>Protected Stream</span>
+          <span>Official Edition</span>
         </div>
       </footer>
     </div>

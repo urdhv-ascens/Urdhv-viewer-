@@ -63,19 +63,30 @@ export function App() {
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
         <Loader2 className="w-10 h-10 text-emerald-400 animate-spin mb-4" />
         <p className="text-xs sm:text-sm font-mono tracking-widest text-zinc-400 uppercase">
-          Initializing Ūrdhv Ascens Educational Viewer...
+          Opening Ūrdhv Ascens Learning Platform...
         </p>
       </div>
+    );
+  }
+
+  // Active Reader View - completely isolated with zero underlying DOM bleed
+  if (selectedBooklet) {
+    return (
+      <ReaderEngine
+        booklet={selectedBooklet}
+        onBackToLibrary={handleBackToLibrary}
+        ads={ads}
+      />
     );
   }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col selection:bg-emerald-500/20 selection:text-emerald-300">
       {/* Top Sponsor Bar */}
-      {ads && ads.topBar && ads.topBar.enabled && (
+      {ads?.topBar?.enabled !== false && (
         <TopSponsorBar
-          slides={ads.topBar.slides}
-          rotationIntervalSeconds={ads.topBar.rotationIntervalSeconds}
+          slides={ads?.topBar?.slides || []}
+          rotationIntervalSeconds={ads?.topBar?.rotationIntervalSeconds || 6}
         />
       )}
 
@@ -89,30 +100,31 @@ export function App() {
             </span>
           </a>
           <span className="hidden sm:inline-block px-2.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-zinc-900 border border-zinc-800 text-zinc-400">
-            Viewer Platform
+            Curriculum Reader
           </span>
         </div>
 
         <a
           href="https://gold-cat-133405.hostingersite.com"
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
+          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
         >
           <span>Studio Flagship</span>
           <ExternalLink className="w-3 h-3 text-zinc-500" />
         </a>
       </header>
 
+      {/* Mobile Top Ad Banner for Mobile View */}
+      {ads?.mobileBanner?.enabled !== false && (
+        <MobileTopAdBanner
+          slides={ads?.mobileBanner?.slides || []}
+          rotationIntervalSeconds={ads?.mobileBanner?.rotationIntervalSeconds || 5}
+        />
+      )}
+
       {/* Viewport Content */}
       <main className="flex-1 relative">
-        {/* Mobile Top Ad Banner for Mobile View */}
-        {ads && ads.mobileBanner && ads.mobileBanner.enabled && (
-          <MobileTopAdBanner
-            slides={ads.mobileBanner.slides}
-            rotationIntervalSeconds={ads.mobileBanner.rotationIntervalSeconds}
-          />
-        )}
 
-        {/* Desktop Side Ads for 2xl viewports */}
+        {/* Desktop Side Ads for large viewports */}
         {ads && ads.sideAds && (
           <DesktopSideAds
             slides={ads.sideAds.slides}
@@ -129,21 +141,12 @@ export function App() {
         />
       </main>
 
-      {/* Active Hardened Reader Engine Modal */}
-      {selectedBooklet && (
-        <ReaderEngine
-          booklet={selectedBooklet}
-          onBackToLibrary={handleBackToLibrary}
-          ads={ads}
-        />
-      )}
-
       {/* Platform Footer */}
       <footer className="border-t border-zinc-900 py-6 px-4 text-center text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>© 2026 ŪRDHV ASCENS. All visual course rights reserved.</p>
           <p className="font-mono text-[11px] text-zinc-600">
-            Powered by Cloudflare Edge CDN & Hostinger Dynamic API
+            Published by Ūrdhv Ascens • Open Knowledge Initiative
           </p>
         </div>
       </footer>

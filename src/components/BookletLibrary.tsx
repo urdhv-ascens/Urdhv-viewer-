@@ -53,23 +53,23 @@ export const BookletLibrary: React.FC<BookletLibraryProps> = ({
         </h1>
 
         <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-8 font-normal">
-          High-resolution, precision-engineered visual modules for students and educators. 
-          100% free open curriculum delivered through Cloudflare edge nodes with zero distractions.
+          Beautifully illustrated, high-resolution learning modules for students and educators. 
+          Free, open-access curriculum designed for focused, self-paced study.
         </p>
 
         {/* Feature Specs Badges (Non-pill, rounded-lg) */}
         <div className="flex flex-wrap items-center justify-center gap-3 text-xs">
           <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-850 text-zinc-300">
             <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="font-semibold">12 Core Visual Modules</span>
+            <span className="font-semibold">12 Interactive Modules</span>
           </div>
           <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-850 text-zinc-300">
             <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="font-semibold">Zero Cost / Public License</span>
+            <span className="font-semibold">100% Free Open Access</span>
           </div>
           <div className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-850 text-zinc-300">
             <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="font-semibold">Smart Prefetch WebP Stream</span>
+            <span className="font-semibold">Instant High-Resolution Reading</span>
           </div>
         </div>
       </div>

@@ -9,6 +9,25 @@ interface DesktopSideAdsProps {
   rotationIntervalSeconds?: number;
 }
 
+const DEFAULT_SIDE_SLIDES: AdSlide[] = [
+  {
+    id: 'default-side-1',
+    title: 'Enterprise Digital Systems',
+    alt: 'Ūrdhv Ascens Studio Engineering',
+    destinationUrl: 'https://gold-cat-133405.hostingersite.com#contact',
+    imageUrl: '/uploads/ad_side_1.png',
+    active: true
+  },
+  {
+    id: 'default-side-2',
+    title: 'Visual AI Curriculum',
+    alt: '12 Interactive Visual Modules',
+    destinationUrl: 'https://gold-cat-133405.hostingersite.com',
+    imageUrl: '/uploads/ad_side_2.png',
+    active: true
+  }
+];
+
 export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
   slides = [],
   leftAd,
@@ -16,32 +35,36 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
   rotationIntervalSeconds = 5
 }) => {
   // Build slide pools
-  const activeSlides: AdSlide[] = [];
+  const pool: AdSlide[] = [];
   if (slides && slides.length > 0) {
     slides.forEach(s => {
-      if (s.active !== false && s.imageUrl) activeSlides.push(s);
+      if (s.active !== false) pool.push(s);
     });
   }
-  if (activeSlides.length === 0) {
-    if (leftAd && leftAd.enabled && leftAd.imageUrl) {
-      activeSlides.push({
+  if (pool.length === 0) {
+    if (leftAd && leftAd.enabled !== false && leftAd.imageUrl) {
+      pool.push({
         id: 'left-ad-default',
         imageUrl: leftAd.imageUrl,
         destinationUrl: leftAd.destinationUrl,
-        alt: leftAd.alt,
+        alt: leftAd.alt || 'Studio Partner',
+        title: leftAd.alt || 'Studio Engineering',
         active: true
       });
     }
-    if (rightAd && rightAd.enabled && rightAd.imageUrl) {
-      activeSlides.push({
+    if (rightAd && rightAd.enabled !== false && rightAd.imageUrl) {
+      pool.push({
         id: 'right-ad-default',
         imageUrl: rightAd.imageUrl,
         destinationUrl: rightAd.destinationUrl,
-        alt: rightAd.alt,
+        alt: rightAd.alt || 'Studio Partner',
+        title: rightAd.alt || 'Visual Modules',
         active: true
       });
     }
   }
+
+  const activeSlides = pool.length > 0 ? pool : DEFAULT_SIDE_SLIDES;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -56,8 +79,6 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
     return () => clearInterval(timer);
   }, [activeSlides.length, isPaused, rotationIntervalSeconds]);
 
-  if (activeSlides.length === 0) return null;
-
   const leftSlide = activeSlides[currentIndex % activeSlides.length];
   const rightSlide = activeSlides[(currentIndex + 1) % activeSlides.length];
 
@@ -68,13 +89,13 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
         aria-label="Partner Advertisement Left"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="hidden 2xl:block fixed left-4 top-24 bottom-24 w-44 z-30 pointer-events-auto select-none"
+        className="hidden xl:block fixed left-3 2xl:left-6 top-24 bottom-24 w-36 2xl:w-44 z-30 pointer-events-auto select-none"
       >
         <a
           href={leftSlide.destinationUrl || 'https://gold-cat-133405.hostingersite.com'}
           target="_blank"
           rel="noopener noreferrer"
-          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"
+          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2.5 group shadow-2xl flex flex-col justify-between"
         >
           <div className="flex items-center justify-between px-1 pt-1 z-10">
             <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30">
@@ -84,15 +105,17 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
           </div>
 
           <div className="relative flex-1 w-full my-2 rounded-xl overflow-hidden bg-zinc-900 flex items-center justify-center">
-            <img
-              key={leftSlide.id || currentIndex}
-              src={leftSlide.imageUrl}
-              alt={leftSlide.alt || leftSlide.title || 'Partner sponsor'}
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/uploads/ad_side_1.png';
-              }}
-            />
+            {leftSlide.imageUrl && (
+              <img
+                key={leftSlide.id || currentIndex}
+                src={leftSlide.imageUrl}
+                alt={leftSlide.alt || leftSlide.title || 'Partner sponsor'}
+                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
           </div>
 
@@ -109,13 +132,13 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
         aria-label="Partner Advertisement Right"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="hidden 2xl:block fixed right-4 top-24 bottom-24 w-44 z-30 pointer-events-auto select-none"
+        className="hidden xl:block fixed right-3 2xl:right-6 top-24 bottom-24 w-36 2xl:w-44 z-30 pointer-events-auto select-none"
       >
         <a
           href={rightSlide.destinationUrl || 'https://gold-cat-133405.hostingersite.com'}
           target="_blank"
           rel="noopener noreferrer"
-          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"
+          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2.5 group shadow-2xl flex flex-col justify-between"
         >
           <div className="flex items-center justify-between px-1 pt-1 z-10">
             <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30">
@@ -125,15 +148,17 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
           </div>
 
           <div className="relative flex-1 w-full my-2 rounded-xl overflow-hidden bg-zinc-900 flex items-center justify-center">
-            <img
-              key={rightSlide.id || (currentIndex + 1)}
-              src={rightSlide.imageUrl}
-              alt={rightSlide.alt || rightSlide.title || 'Partner sponsor'}
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/uploads/ad_side_2.png';
-              }}
-            />
+            {rightSlide.imageUrl && (
+              <img
+                key={rightSlide.id || (currentIndex + 1)}
+                src={rightSlide.imageUrl}
+                alt={rightSlide.alt || rightSlide.title || 'Partner sponsor'}
+                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
           </div>
 
