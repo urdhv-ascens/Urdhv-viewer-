@@ -61,14 +61,14 @@ export const DesktopReaderSideAds: React.FC<DesktopReaderSideAdsProps> = ({
         href={currentSlide.destinationUrl || 'https://urdhvascens.com'}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative w-full h-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950/90 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between p-2 shadow-2xl block"
+        className="relative w-full h-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between p-2 shadow-2xl block"
       >
         {/* Top Header Badge */}
         <div className="flex items-center justify-between px-1 pt-1 z-10">
           <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30">
             SPONSORED
           </span>
-          <span className="p-1 rounded bg-black/60 text-zinc-500 group-hover:text-emerald-400 transition-colors">
+          <span className="p-1 rounded bg-black text-zinc-500 group-hover:text-emerald-400 transition-colors">
             <ExternalLink className="w-2.5 h-2.5" />
           </span>
         </div>

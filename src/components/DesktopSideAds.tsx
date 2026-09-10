@@ -74,7 +74,7 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
           href={leftSlide.destinationUrl || 'https://urdhvascens.com'}
           target="_blank"
           rel="noopener noreferrer"
-          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950/90 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"
+          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"
         >
           <div className="flex items-center justify-between px-1 pt-1 z-10">
             <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30">
@@ -115,7 +115,7 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
           href={rightSlide.destinationUrl || 'https://urdhvascens.com'}
           target="_blank"
           rel="noopener noreferrer"
-          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950/90 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"
+          className="block h-full w-full rounded-2xl overflow-hidden border border-zinc-850 bg-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2 group shadow-2xl flex flex-col justify-between"
         >
           <div className="flex items-center justify-between px-1 pt-1 z-10">
             <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30">

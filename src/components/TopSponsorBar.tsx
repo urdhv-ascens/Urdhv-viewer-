@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { TopBarSlide } from '../types';
-import { ExternalLink, X } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 interface TopSponsorBarProps {
   slides: TopBarSlide[];
@@ -13,21 +13,20 @@ export const TopSponsorBar: React.FC<TopSponsorBarProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
 
   const activeSlides = slides.filter(s => s.active);
 
   useEffect(() => {
-    if (activeSlides.length <= 1 || isPaused || isDismissed) return;
+    if (activeSlides.length <= 1 || isPaused) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % activeSlides.length);
     }, rotationIntervalSeconds * 1000);
 
     return () => clearInterval(timer);
-  }, [activeSlides.length, isPaused, isDismissed, rotationIntervalSeconds]);
+  }, [activeSlides.length, isPaused, rotationIntervalSeconds]);
 
-  if (isDismissed || activeSlides.length === 0) return null;
+  if (activeSlides.length === 0) return null;
 
   const currentSlide = activeSlides[currentIndex];
 
@@ -36,10 +35,10 @@ export const TopSponsorBar: React.FC<TopSponsorBarProps> = ({
       aria-label="Partner Sponsor Announcement"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-b border-zinc-800/80 px-4 py-2 flex items-center justify-between text-xs sm:text-sm text-zinc-300 transition-all z-40"
+      className="w-full bg-zinc-950 border-b border-zinc-850 px-4 py-2 flex items-center justify-between text-xs sm:text-sm text-zinc-300 transition-all z-40"
     >
       <div className="flex-1 flex items-center justify-center space-x-2 text-center truncate">
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-black text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
           Sponsored
         </span>
         <span className="font-medium text-white truncate">{currentSlide.title}</span>
@@ -74,13 +73,6 @@ export const TopSponsorBar: React.FC<TopSponsorBarProps> = ({
             ))}
           </div>
         )}
-        <button
-          onClick={() => setIsDismissed(true)}
-          aria-label="Dismiss banner"
-          className="text-zinc-500 hover:text-zinc-300 transition-colors p-1"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
       </div>
     </aside>
   );
