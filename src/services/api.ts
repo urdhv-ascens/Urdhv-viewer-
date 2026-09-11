@@ -5,16 +5,25 @@
 
 import type { Booklet, BookletManifest, AdsConfig } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://gold-cat-133405.hostingersite.com/api';
+export function getApiBase(): string {
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+    }
+  }
+  return import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'https://gold-cat-133405.hostingersite.com/api';
+}
+
+const API_BASE = getApiBase();
 
 /**
  * Fetch booklet catalog from Hostinger API with local static fallback
  */
 export async function getBookletsCatalog(): Promise<Booklet[]> {
   try {
-    const res = await fetch(`${API_BASE}/booklets.php`, {
+    const res = await fetch(`${API_BASE}/booklets.php?t=${Date.now()}`, {
       headers: { 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(6000)
+      signal: AbortSignal.timeout(12000)
     });
     if (res.ok) {
       const data = await res.json();
@@ -46,8 +55,8 @@ export async function getBookletsCatalog(): Promise<Booklet[]> {
  */
 export async function getAdsConfig(): Promise<AdsConfig> {
   try {
-    const res = await fetch(`${API_BASE}/ads.php`, {
-      signal: AbortSignal.timeout(5000)
+    const res = await fetch(`${API_BASE}/ads.php?t=${Date.now()}`, {
+      signal: AbortSignal.timeout(12000)
     });
     if (res.ok) {
       return await res.json();
