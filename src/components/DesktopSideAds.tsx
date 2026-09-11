@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { AdSlide, SideAdPlacement } from '../types';
-import { ExternalLink } from 'lucide-react';
 
 export interface DesktopSideAdsProps {
   position?: 'left' | 'right';
@@ -76,7 +75,7 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
 
   return (
     <div
-      aria-label={`Partner Advertisement ${position}`}
+      aria-label={`Advertisement ${position}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       className="w-full select-none"
@@ -85,51 +84,19 @@ export const DesktopSideAds: React.FC<DesktopSideAdsProps> = ({
         href={currentSlide.destinationUrl || 'https://urdhvascens.pages.dev#contact'}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full h-[540px] max-h-[75vh] rounded-2xl overflow-hidden border border-zinc-850 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 hover:border-emerald-500/50 transition-all duration-300 p-2.5 group shadow-2xl flex flex-col justify-between"
+        className="block w-full h-[540px] max-h-[75vh] rounded-2xl overflow-hidden border border-zinc-850 bg-black hover:border-emerald-500/50 transition-all duration-300 group shadow-2xl"
       >
-        <div className="flex items-center justify-between px-1 pt-1 z-10">
-          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-black text-emerald-400 border border-emerald-500/30">
-            SPONSORED
-          </span>
-          <ExternalLink className="w-2.5 h-2.5 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
-        </div>
-
-        <div className="relative flex-1 w-full my-2 rounded-xl overflow-hidden bg-zinc-900 flex items-center justify-center">
-          {currentSlide.imageUrl && (
-            <img
-              key={currentSlide.id || currentIndex}
-              src={currentSlide.imageUrl}
-              alt={currentSlide.alt || currentSlide.title || 'Partner sponsor'}
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-        </div>
-
-        <div className="px-1 pb-1 z-10 space-y-1">
-          {currentSlide.title && (
-            <p className="text-[11px] font-bold text-white group-hover:text-emerald-400 transition-colors truncate">
-              {currentSlide.title}
-            </p>
-          )}
-          {activeSlides.length > 1 && (
-            <div className="flex items-center justify-center space-x-1 pt-0.5">
-              {activeSlides.map((_, idx) => (
-                <span
-                  key={idx}
-                  className={`h-1 rounded-full transition-all ${
-                    idx === (currentIndex % activeSlides.length)
-                      ? 'w-3 bg-emerald-400'
-                      : 'w-1 bg-zinc-700'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {currentSlide.imageUrl && (
+          <img
+            key={currentSlide.id || currentIndex}
+            src={currentSlide.imageUrl}
+            alt={currentSlide.alt || 'Advertisement'}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              (e.target as HTMLElement).style.display = 'none';
+            }}
+          />
+        )}
       </a>
     </div>
   );
