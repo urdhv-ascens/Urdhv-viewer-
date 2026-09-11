@@ -15,7 +15,8 @@ import {
   RotateCcw,
   Layers,
   AlertCircle,
-  Loader2
+  Loader2,
+  ShieldCheck
 } from 'lucide-react';
 
 interface ReaderEngineProps {
@@ -37,6 +38,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLElement>(null);
 
   // Fullscreen Handlers
   const exitFullscreen = useCallback(() => {
@@ -79,23 +81,23 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
   };
 
   // Zoom Handlers
-  const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.25, 2.5));
-  const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.25, 0.6));
+  const zoomIn = () => setZoomLevel((prev) => Math.min(Number((prev + 0.25).toFixed(2)), 3.0));
+  const zoomOut = () => setZoomLevel((prev) => Math.max(Number((prev - 0.25).toFixed(2)), 0.5));
   const resetZoom = () => setZoomLevel(1.0);
 
   // Fit Width Handler
   const fitWidth = () => {
-    if (containerRef.current && canvasRef.current) {
-      const containerWidth = containerRef.current.clientWidth - 32;
-      const originalWidth = canvasRef.current.width / zoomLevel;
-      if (originalWidth > 0) {
-        const ratio = containerWidth / originalWidth;
-        setZoomLevel(Math.min(Math.max(ratio, 0.7), 2.2));
-      }
+    if (viewportRef.current) {
+      const containerWidth = viewportRef.current.clientWidth;
+      const isMobile = containerWidth < 640;
+      const targetWidth = isMobile ? containerWidth - 20 : Math.min(containerWidth - 60, 1100);
+      const baseWidth = isMobile ? Math.max(containerWidth - 24, 320) : 800;
+      const calculatedZoom = Math.max(0.6, Math.min(2.5, Number((targetWidth / baseWidth).toFixed(2))));
+      setZoomLevel(calculatedZoom);
     }
   };
 
-  // Touch swipe handling for mobile
+  // Touch swipe handling for mobile navigation
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
@@ -109,8 +111,8 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
     const diffX = touchStartX.current - e.changedTouches[0].clientX;
     const diffY = touchStartY.current - e.changedTouches[0].clientY;
 
-    // Horizontal swipe threshold: 50px and horizontally dominant
-    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+    // Horizontal swipe threshold: 50px and horizontally dominant (only when zoom is normal)
+    if (zoomLevel <= 1.1 && Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
       if (diffX > 0) {
         goToNext();
       } else {
@@ -121,7 +123,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
     touchStartY.current = null;
   };
 
-  // Hook for bounded LRU cache and smart prefetching
+  // Hook for bounded LRU cache and smart prefetching with DRM watermark
   const { loading, error, renderToCanvas, retry } = usePageLoader(booklet, currentPage);
 
   // Keep pageInput synced with currentPage
@@ -136,19 +138,39 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
     }
   }, [loading, error, renderToCanvas, zoomLevel]);
 
-  // Keyboard navigation
+  // DRM & Keyboard Navigation Protection
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Standard shortcut prevention
+      // DRM Shortcut Prevention: Save, Print, View Source, Copy, Select All
       if (
         (e.ctrlKey || e.metaKey) &&
-        (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P' || e.key === 'u' || e.key === 'U')
+        (e.key === 's' || e.key === 'S' ||
+         e.key === 'p' || e.key === 'P' ||
+         e.key === 'u' || e.key === 'U' ||
+         e.key === 'c' || e.key === 'C' ||
+         e.key === 'a' || e.key === 'A')
       ) {
         e.preventDefault();
         return;
       }
 
-      // Navigation
+      // Block Developer Tools shortcuts: F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+      if (
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c'))
+      ) {
+        e.preventDefault();
+        return;
+      }
+
+      // Deter PrintScreen
+      if (e.key === 'PrintScreen') {
+        if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText('').catch(() => {});
+        }
+      }
+
+      // Reader Navigation
       if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault();
         goToNext();
@@ -161,16 +183,45 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         } else {
           onBackToLibrary();
         }
+      } else if (e.key === '+' || e.key === '=') {
+        zoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        zoomOut();
+      } else if (e.key === '0') {
+        resetZoom();
       }
     };
 
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      if (e.clipboardData) {
+        e.clipboardData.setData('text/plain', 'Ūrdhv Ascens DRM Protected Content');
+      }
+    };
+
+    const handleDragStart = (e: DragEvent) => e.preventDefault();
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('copy', handleCopy);
+    window.addEventListener('dragstart', handleDragStart);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('copy', handleCopy);
+      window.removeEventListener('dragstart', handleDragStart);
+    };
   }, [goToNext, goToPrev, isFullscreen, exitFullscreen, onBackToLibrary]);
 
   // Helper for thumbnail URL
   const getThumbnailUrl = (index: number) => {
     return defaultDocumentProvider.getThumbnailUrl(booklet, index);
+  };
+
+  // Calculate dynamic display width based on viewport and zoom
+  const getDisplayWidth = () => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    const baseWidth = isMobile ? Math.max((window.innerWidth || 360) - 20, 310) : 800;
+    return Math.round(baseWidth * zoomLevel);
   };
 
   return (
@@ -180,11 +231,15 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       className="fixed inset-0 z-50 flex flex-col bg-black text-white select-none overflow-hidden h-[100dvh] w-full"
+      style={{
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+      }}
     >
       {/* Top Reading Navigation Bar */}
-      <header className="h-14 bg-zinc-950 border-b border-zinc-800 px-4 flex items-center justify-between z-20">
+      <header className="h-14 bg-zinc-950 border-b border-zinc-800 px-3 sm:px-4 flex items-center justify-between z-20 shrink-0">
         {/* Left: Back & Title */}
-        <div className="flex items-center space-x-3 truncate">
+        <div className="flex items-center space-x-2 sm:space-x-3 truncate">
           <button
             onClick={onBackToLibrary}
             className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
@@ -193,17 +248,23 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="truncate">
-            <h2 className="text-xs sm:text-sm font-bold text-white truncate">
+            <h2 className="text-xs sm:text-sm font-bold text-white truncate max-w-[140px] xs:max-w-[200px] sm:max-w-xs">
               {booklet.title}
             </h2>
-            <p className="text-[11px] text-zinc-400 hidden sm:block">
-              {booklet.category === 'student' ? 'Student AI Course' : 'Educators AI Toolkit'} • v{booklet.version}
-            </p>
+            <div className="flex items-center space-x-1.5 text-[10px] text-zinc-400">
+              <span className="hidden sm:inline">
+                {booklet.category === 'student' ? 'Student AI Course' : 'Educators AI Toolkit'}
+              </span>
+              <span className="hidden sm:inline">•</span>
+              <span className="flex items-center text-emerald-400 font-mono">
+                <ShieldCheck className="w-3 h-3 mr-0.5 inline" /> DRM Secured
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Center: Page Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 sm:space-x-2">
           <button
             onClick={goToPrev}
             disabled={currentPage <= 1}
@@ -219,9 +280,9 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
               value={pageInput}
               onChange={(e) => setPageInput(e.target.value)}
               onBlur={() => setPageInput(String(currentPage))}
-              className="w-10 sm:w-12 bg-zinc-900 border border-zinc-700 rounded-md text-center py-1 text-xs font-mono text-white focus:outline-none focus:border-emerald-400"
+              className="w-9 sm:w-12 bg-zinc-900 border border-zinc-700 rounded-md text-center py-1 text-xs font-mono text-white focus:outline-none focus:border-emerald-400"
             />
-            <span className="text-xs text-zinc-500">/ {booklet.totalPages}</span>
+            <span className="text-[11px] sm:text-xs text-zinc-500 font-mono">/ {booklet.totalPages}</span>
           </form>
 
           <button
@@ -234,24 +295,28 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
           </button>
         </div>
 
-        {/* Right: Zoom & Tool Controls */}
-        <div className="flex items-center space-x-1 sm:space-x-2">
+        {/* Right: Zoom & Tool Controls (Desktop & Tablet) */}
+        <div className="flex items-center space-x-1 sm:space-x-1.5">
           <button
             onClick={zoomOut}
-            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors hidden sm:inline-flex"
-            title="Zoom Out"
+            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            title="Zoom Out (-)"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
 
-          <span className="text-[11px] font-mono text-zinc-400 min-w-10 text-center hidden sm:inline-block">
+          <button
+            onClick={resetZoom}
+            className="px-1.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[11px] font-mono text-zinc-300 hover:text-white transition-colors min-w-[42px] text-center"
+            title="Reset Zoom to 100%"
+          >
             {Math.round(zoomLevel * 100)}%
-          </span>
+          </button>
 
           <button
             onClick={zoomIn}
-            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors hidden sm:inline-flex"
-            title="Zoom In"
+            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            title="Zoom In (+)"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
@@ -261,12 +326,12 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             className="px-2 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[11px] font-medium text-zinc-300 hover:text-white transition-colors hidden md:inline-flex"
             title="Fit to Screen Width"
           >
-            Fit Width
+            Fit
           </button>
 
           <button
             onClick={resetZoom}
-            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors hidden sm:inline-flex"
+            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors hidden lg:inline-flex"
             title="Reset Zoom (100%)"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -288,7 +353,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
           {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullscreen}
-            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors hidden sm:inline-flex"
             title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -304,8 +369,11 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         />
       )}
 
-      {/* Main Canvas Reading Viewport - Scrollable vertically for comfortable reading */}
-      <main className="flex-1 relative overflow-y-auto overflow-x-hidden flex items-start sm:items-center justify-between p-2 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container gap-4 touch-pan-y">
+      {/* Main Canvas Reading Viewport - Supports both horizontal and vertical panning when zoomed */}
+      <main
+        ref={viewportRef}
+        className="flex-1 relative overflow-auto flex items-start justify-center p-2 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container touch-pan-x touch-pan-y select-none"
+      >
         {/* Left Side Ad Banner (Desktop) */}
         {ads?.sideAds?.enabled && (
           <DesktopReaderSideAds
@@ -317,11 +385,11 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         )}
 
         {/* Central Canvas Reading Area */}
-        <div className="flex-1 flex flex-col items-center justify-start sm:justify-center relative min-w-0 w-full py-2 sm:py-0">
+        <div className="flex-1 flex flex-col items-center justify-start relative min-w-0 w-full py-2 sm:py-0">
           {loading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 z-30 rounded-lg min-h-[300px]">
               <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
-              <p className="text-xs text-zinc-400 font-mono">Loading page {currentPage}...</p>
+              <p className="text-xs text-zinc-400 font-mono">Decrypting & rendering page {currentPage}...</p>
             </div>
           )}
 
@@ -338,20 +406,36 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
               </button>
             </div>
           ) : (
-            <div className="relative inline-block transition-transform duration-100 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900 my-auto">
+            <div
+              className="relative inline-block transition-all duration-150 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900 mx-auto my-auto shrink-0 select-none"
+              style={{
+                width: `${getDisplayWidth()}px`,
+                maxWidth: 'none',
+              }}
+            >
               <canvas
                 ref={canvasRef}
-                className="w-full max-w-[98vw] sm:max-w-full sm:max-h-[82vh] h-auto object-contain block"
+                className="w-full h-auto block select-none pointer-events-none"
+                style={{
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
+                }}
+              />
+              {/* DRM Transparent Overlay: blocks right click, drag, image save on touch & desktop */}
+              <div
+                className="absolute inset-0 z-10 select-none bg-transparent cursor-default pointer-events-auto"
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
               />
             </div>
           )}
 
-          {/* Desktop/Tablet Floating Navigation Arrows - Hidden on mobile so canvas text is NEVER blocked */}
+          {/* Desktop/Tablet Floating Navigation Arrows */}
           <button
             onClick={goToPrev}
             disabled={currentPage <= 1}
             aria-label="Previous Page"
-            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/90 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10 shadow-lg"
+            className="hidden sm:flex fixed left-4 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/90 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-20 shadow-lg"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -360,7 +444,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             onClick={goToNext}
             disabled={currentPage >= booklet.totalPages}
             aria-label="Next Page"
-            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/90 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-10 shadow-lg"
+            className="hidden sm:flex fixed right-4 top-1/2 -translate-y-1/2 p-3 rounded-lg bg-zinc-900/90 hover:bg-zinc-850 text-zinc-300 border border-zinc-800 disabled:hidden transition-colors z-20 shadow-lg"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -377,28 +461,67 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         )}
       </main>
 
-      {/* Dedicated Mobile Bottom Navigation Bar (Buttons never overlap reading canvas) */}
+      {/* Dedicated Mobile Bottom Navigation Bar with Full Zoom & Navigation Controls */}
       <div className="sm:hidden bg-zinc-950 border-t border-zinc-850 px-3 py-2 flex items-center justify-between z-30 shrink-0">
-        <button
-          onClick={goToPrev}
-          disabled={currentPage <= 1}
-          className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-850 active:bg-zinc-800 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed border border-zinc-800 text-xs font-semibold"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span>Prev</span>
-        </button>
+        {/* Page Nav */}
+        <div className="flex items-center space-x-1.5">
+          <button
+            onClick={goToPrev}
+            disabled={currentPage <= 1}
+            className="flex items-center px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 active:bg-zinc-800 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed border border-zinc-800 text-xs font-semibold"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
 
-        <div className="flex items-center space-x-2">
-          <form onSubmit={handlePageJump} className="flex items-center space-x-1">
-            <input
-              type="text"
-              value={pageInput}
-              onChange={(e) => setPageInput(e.target.value)}
-              onBlur={() => setPageInput(String(currentPage))}
-              className="w-10 bg-zinc-900 border border-zinc-700 rounded-md text-center py-1 text-xs font-mono text-white focus:outline-none focus:border-emerald-400"
-            />
-            <span className="text-xs text-zinc-400 font-mono">/ {booklet.totalPages}</span>
-          </form>
+          <span className="text-xs font-mono text-zinc-400 px-1">
+            {currentPage}/{booklet.totalPages}
+          </span>
+
+          <button
+            onClick={goToNext}
+            disabled={currentPage >= booklet.totalPages}
+            className="flex items-center px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 active:bg-zinc-800 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed border border-zinc-800 text-xs font-semibold"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Mobile Quick Zoom Controls */}
+        <div className="flex items-center space-x-1 bg-zinc-900/90 border border-zinc-800 rounded-lg p-0.5">
+          <button
+            onClick={zoomOut}
+            className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-300 active:text-white"
+            title="Zoom Out"
+          >
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={resetZoom}
+            className="px-1.5 py-0.5 text-[10px] font-mono text-emerald-400 font-bold"
+            title="Reset Zoom"
+          >
+            {Math.round(zoomLevel * 100)}%
+          </button>
+
+          <button
+            onClick={zoomIn}
+            className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-300 active:text-white"
+            title="Zoom In"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Mobile Extra Controls */}
+        <div className="flex items-center space-x-1.5">
+          <button
+            onClick={fitWidth}
+            className="px-2 py-1.5 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800 text-[11px] font-medium"
+            title="Fit Width"
+          >
+            Fit
+          </button>
 
           <button
             onClick={() => setShowThumbnails(!showThumbnails)}
@@ -412,15 +535,6 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             <Layers className="w-4 h-4" />
           </button>
         </div>
-
-        <button
-          onClick={goToNext}
-          disabled={currentPage >= booklet.totalPages}
-          className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-850 active:bg-zinc-800 text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed border border-zinc-800 text-xs font-semibold"
-        >
-          <span>Next</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
       </div>
 
       {/* Bottom Thumbnail Filmstrip Drawer */}
@@ -459,17 +573,21 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         </aside>
       )}
 
-      {/* Footer Status Bar */}
+      {/* Footer Status Bar with DRM & Navigation Info */}
       <footer className="h-7 bg-zinc-950 border-t border-zinc-900 px-4 flex items-center justify-between text-[10px] text-zinc-500 font-mono shrink-0">
         <div className="flex items-center space-x-2">
           <span>ŪRDHV ASCENS READER</span>
           <span>•</span>
           <span className="text-zinc-400">Page {currentPage} of {booklet.totalPages}</span>
+          <span>•</span>
+          <span className="text-emerald-500 flex items-center">
+            <ShieldCheck className="w-3 h-3 mr-0.5 inline" /> Protected by Ūrdhv DRM
+          </span>
         </div>
         <div className="hidden sm:flex items-center space-x-4">
-          <span>Swipe or Arrow Keys to Navigate</span>
+          <span>Use + / - or Mouse Wheel to Zoom</span>
           <span>•</span>
-          <span>Official Edition</span>
+          <span>Arrow Keys to Navigate</span>
         </div>
       </footer>
     </div>

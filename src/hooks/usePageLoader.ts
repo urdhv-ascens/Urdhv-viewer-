@@ -98,6 +98,8 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
     });
   }, [getPageUrl, evictIfNecessary, currentPage]);
 
+  const [pageDimensions, setPageDimensions] = useState<{ width: number; height: number } | null>(null);
+
   // Load active page and trigger prefetch
   useEffect(() => {
     if (!booklet || currentPage < 1 || currentPage > booklet.totalPages) {
@@ -109,8 +111,9 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
     setError(null);
 
     loadPageImage(currentPage)
-      .then(() => {
+      .then((img) => {
         if (!isCancelled) {
+          setPageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
           setLoading(false);
           // Smart prefetch: next page
           if (currentPage < booklet.totalPages) {
@@ -134,8 +137,8 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
     };
   }, [booklet, currentPage, loadPageImage]);
 
-  // Expose render function for Canvas
-  const renderToCanvas = useCallback((canvas: HTMLCanvasElement, zoomLevel = 1.0) => {
+  // Expose render function for Canvas with DRM watermarking baked into pixels
+  const renderToCanvas = useCallback((canvas: HTMLCanvasElement, zoomLevel = 1.0, watermarkLabel?: string) => {
     const cached = cacheRef.current.get(currentPage);
     if (!cached || !cached.img || !canvas) return;
 
@@ -143,9 +146,10 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas dimensions based on image natural aspect ratio and zoom
-    const targetWidth = img.naturalWidth * zoomLevel;
-    const targetHeight = img.naturalHeight * zoomLevel;
+    // Use device pixel ratio for super-crisp rendering when zoomed
+    const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+    const targetWidth = Math.round(img.naturalWidth * Math.max(zoomLevel, 1) * dpr);
+    const targetHeight = Math.round(img.naturalHeight * Math.max(zoomLevel, 1) * dpr);
 
     canvas.width = targetWidth;
     canvas.height = targetHeight;
@@ -155,6 +159,24 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
     ctx.imageSmoothingQuality = 'high';
     ctx.clearRect(0, 0, targetWidth, targetHeight);
     ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+    // DRM WATERMARKING: Render forensic diagonal watermark tiled into the canvas raster
+    ctx.save();
+    ctx.rotate((-25 * Math.PI) / 180);
+    const fontSize = Math.max(16, Math.round(22 * dpr * Math.max(zoomLevel * 0.7, 0.8)));
+    ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`;
+    ctx.fillStyle = 'rgba(160, 160, 160, 0.08)';
+    const markText = watermarkLabel || 'ŪRDHV ASCENS SECURE READER • ENCRYPTED COPY • DO NOT DISTRIBUTE';
+
+    const stepX = 420 * dpr * Math.max(zoomLevel, 1);
+    const stepY = 220 * dpr * Math.max(zoomLevel, 1);
+
+    for (let x = -targetWidth * 2; x < targetWidth * 3; x += stepX) {
+      for (let y = -targetHeight * 2; y < targetHeight * 3; y += stepY) {
+        ctx.fillText(markText, x, y);
+      }
+    }
+    ctx.restore();
   }, [currentPage]);
 
   const retry = useCallback(() => {
@@ -162,7 +184,10 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
     setLoading(true);
     setError(null);
     loadPageImage(currentPage)
-      .then(() => setLoading(false))
+      .then((img) => {
+        setPageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+        setLoading(false);
+      })
       .catch((err) => {
         setError(err.message || 'Retry failed. Connection error.');
         setLoading(false);
@@ -172,6 +197,7 @@ export function usePageLoader(booklet: Booklet | null, currentPage: number) {
   return {
     loading,
     error,
+    pageDimensions,
     renderToCanvas,
     retry
   };
