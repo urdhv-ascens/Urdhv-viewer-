@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import type { AdSlide } from '../types';
 
-interface MobileTopAdBannerProps {
+interface MobileBottomAdBannerProps {
   slides?: AdSlide[];
   rotationIntervalSeconds?: number;
 }
 
 const DEFAULT_SLIDES: AdSlide[] = [
   {
-    id: 'default-mob-1',
+    id: 'default-bottom-1',
     title: 'ŪRDHV ASCENS STUDIO',
     alt: 'Bespoke Digital Architecture & Flagships',
     destinationUrl: 'https://urdhvascens.pages.dev#contact',
@@ -16,7 +16,7 @@ const DEFAULT_SLIDES: AdSlide[] = [
     active: true
   },
   {
-    id: 'default-mob-2',
+    id: 'default-bottom-2',
     title: 'VISUAL AI CURRICULUM',
     alt: '12 Interactive Open-Access Modules',
     destinationUrl: 'https://urdhvascens.pages.dev',
@@ -25,7 +25,7 @@ const DEFAULT_SLIDES: AdSlide[] = [
   }
 ];
 
-export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
+export const MobileBottomAdBanner: React.FC<MobileBottomAdBannerProps> = ({
   slides = [],
   rotationIntervalSeconds = 5
 }) => {
@@ -49,13 +49,13 @@ export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
 
   return (
     <aside
-      aria-label="Advertisement"
+      aria-label="Bottom advertisement"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full px-2 sm:px-3 py-1.5 select-none"
+      className="w-full px-2 sm:px-3 py-1 select-none"
     >
-      {/* Full-width wide mobile ad banner card */}
-      <div className="relative w-full h-[72px] sm:h-20 rounded-xl overflow-hidden border border-zinc-800/90 hover:border-emerald-500/40 transition-colors bg-black shadow-lg">
+      {/* Compact bottom ad banner for reader view */}
+      <div className="relative w-full h-[60px] sm:h-[72px] rounded-xl overflow-hidden border border-zinc-800/90 hover:border-emerald-500/40 transition-colors bg-black shadow-lg">
         <a
           href={currentSlide.destinationUrl || 'https://urdhvascens.pages.dev#contact'}
           target="_blank"

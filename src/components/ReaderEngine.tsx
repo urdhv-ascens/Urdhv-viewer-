@@ -4,6 +4,7 @@ import { usePageLoader } from '../hooks/usePageLoader';
 import { defaultDocumentProvider } from '../services/documentProvider';
 import { DesktopReaderSideAds } from './DesktopReaderSideAds';
 import { MobileTopAdBanner } from './MobileTopAdBanner';
+import { MobileBottomAdBanner } from './MobileBottomAdBanner';
 import {
   ChevronLeft,
   ChevronRight,
@@ -460,6 +461,16 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
           />
         )}
       </main>
+
+      {/* Mobile Bottom Ad Banner - Below reader viewport, above mobile nav */}
+      {ads?.mobileBanner?.enabled !== false && (
+        <div className="sm:hidden shrink-0">
+          <MobileBottomAdBanner
+            slides={ads?.mobileBanner?.slides || []}
+            rotationIntervalSeconds={ads?.mobileBanner?.rotationIntervalSeconds || 5}
+          />
+        </div>
+      )}
 
       {/* Dedicated Mobile Bottom Navigation Bar with Full Zoom & Navigation Controls */}
       <div className="sm:hidden bg-zinc-950 border-t border-zinc-850 px-3 py-2 flex items-center justify-between z-30 shrink-0">
