@@ -82,7 +82,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
   };
 
   // Zoom Handlers
-  const zoomIn = () => setZoomLevel((prev) => Math.min(Number((prev + 0.25).toFixed(2)), 3.0));
+  const zoomIn = () => setZoomLevel((prev) => Math.min(Number((prev + 0.25).toFixed(2)), 3.5));
   const zoomOut = () => setZoomLevel((prev) => Math.max(Number((prev - 0.25).toFixed(2)), 0.5));
   const resetZoom = () => setZoomLevel(1.0);
 
@@ -98,31 +98,113 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
     }
   };
 
-  // Touch swipe handling for mobile navigation
+  // Pinch-to-zoom & touch gesture handling with DRM preservation
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  const initialPinchDist = useRef<number | null>(null);
+  const initialZoom = useRef<number>(1.0);
+  const isPinching = useRef<boolean>(false);
+  const zoomLevelRef = useRef<number>(zoomLevel);
+  const [isPinchActive, setIsPinchActive] = useState(false);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  };
+  useEffect(() => {
+    zoomLevelRef.current = zoomLevel;
+  }, [zoomLevel]);
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const diffX = touchStartX.current - e.changedTouches[0].clientX;
-    const diffY = touchStartY.current - e.changedTouches[0].clientY;
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
 
-    // Horizontal swipe threshold: 50px and horizontally dominant (only when zoom is normal)
-    if (zoomLevel <= 1.1 && Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
-      if (diffX > 0) {
-        goToNext();
-      } else {
-        goToPrev();
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // Two-finger pinch gesture start
+        isPinching.current = true;
+        setIsPinchActive(true);
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialPinchDist.current = dist;
+        initialZoom.current = zoomLevelRef.current;
+      } else if (e.touches.length === 1) {
+        // Single-finger touch start
+        isPinching.current = false;
+        touchStartX.current = e.touches[0].clientX;
+        touchStartY.current = e.touches[0].clientY;
       }
-    }
-    touchStartX.current = null;
-    touchStartY.current = null;
-  };
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && initialPinchDist.current !== null && initialPinchDist.current > 0) {
+        // Prevent default browser pinch-zoom so only the DRM canvas zooms
+        e.preventDefault();
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const factor = currentDist / initialPinchDist.current;
+        const targetZoom = Math.min(Math.max(Number((initialZoom.current * factor).toFixed(2)), 0.5), 3.5);
+        setZoomLevel(targetZoom);
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        initialPinchDist.current = null;
+        setIsPinchActive(false);
+      }
+
+      if (e.touches.length === 0) {
+        // Single-finger horizontal swipe navigation (only when not zoomed in)
+        if (!isPinching.current && touchStartX.current !== null && touchStartY.current !== null && e.changedTouches.length > 0) {
+          const diffX = touchStartX.current - e.changedTouches[0].clientX;
+          const diffY = touchStartY.current - e.changedTouches[0].clientY;
+
+          if (zoomLevelRef.current <= 1.15 && Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+            if (diffX > 0) {
+              goToNext();
+            } else {
+              goToPrev();
+            }
+          }
+        }
+        isPinching.current = false;
+        touchStartX.current = null;
+        touchStartY.current = null;
+      }
+    };
+
+    const onTouchCancel = () => {
+      initialPinchDist.current = null;
+      isPinching.current = false;
+      setIsPinchActive(false);
+      touchStartX.current = null;
+      touchStartY.current = null;
+    };
+
+    // Trackpad precision pinch-to-zoom (wheel + ctrlKey)
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const zoomDelta = -e.deltaY * 0.01;
+        setZoomLevel((prev) => Math.min(Math.max(Number((prev + zoomDelta).toFixed(2)), 0.5), 3.5));
+      }
+    };
+
+    viewport.addEventListener('touchstart', onTouchStart, { passive: true });
+    viewport.addEventListener('touchmove', onTouchMove, { passive: false });
+    viewport.addEventListener('touchend', onTouchEnd, { passive: true });
+    viewport.addEventListener('touchcancel', onTouchCancel, { passive: true });
+    viewport.addEventListener('wheel', onWheel, { passive: false });
+
+    return () => {
+      viewport.removeEventListener('touchstart', onTouchStart);
+      viewport.removeEventListener('touchmove', onTouchMove);
+      viewport.removeEventListener('touchend', onTouchEnd);
+      viewport.removeEventListener('touchcancel', onTouchCancel);
+      viewport.removeEventListener('wheel', onWheel);
+    };
+  }, [goToNext, goToPrev]);
 
   // Hook for bounded LRU cache and smart prefetching with DRM watermark
   const { loading, error, renderToCanvas, retry } = usePageLoader(booklet, currentPage);
@@ -229,8 +311,6 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
     <div
       ref={containerRef}
       onContextMenu={(e) => e.preventDefault()}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
       className="fixed inset-0 z-50 flex flex-col bg-black text-white select-none overflow-hidden h-[100dvh] w-full"
       style={{
         WebkitUserSelect: 'none',
@@ -370,11 +450,21 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         />
       )}
 
-      {/* Main Canvas Reading Viewport - Supports both horizontal and vertical panning when zoomed */}
+      {/* Main Canvas Reading Viewport - Supports pinch zoom, panning and swipe navigation */}
       <main
         ref={viewportRef}
+        onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
         className="flex-1 relative overflow-auto flex items-start justify-center p-2 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container touch-pan-x touch-pan-y select-none"
       >
+        {/* Dynamic Floating Pinch Zoom Indicator HUD */}
+        {isPinchActive && (
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-3.5 py-1.5 bg-black/90 backdrop-blur-md border border-emerald-500/50 rounded-full text-emerald-400 font-mono text-xs font-bold shadow-2xl flex items-center gap-1.5 pointer-events-none animate-in fade-in zoom-in-95 duration-100">
+            <ZoomIn className="w-3.5 h-3.5 animate-pulse" />
+            <span>{Math.round(zoomLevel * 100)}%</span>
+          </div>
+        )}
+
         {/* Left Side Ad Banner (Desktop) */}
         {ads?.sideAds?.enabled && (
           <DesktopReaderSideAds
@@ -408,11 +498,14 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             </div>
           ) : (
             <div
-              className="relative inline-block transition-all duration-150 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900 mx-auto my-auto shrink-0 select-none"
+              className="relative inline-block transition-all duration-150 ease-out shadow-2xl rounded-lg overflow-hidden border border-zinc-800/60 bg-zinc-900 mx-auto my-auto shrink-0 select-none reader-canvas-container"
               style={{
                 width: `${getDisplayWidth()}px`,
                 maxWidth: 'none',
+                WebkitTouchCallout: 'none',
               }}
+              onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
             >
               <canvas
                 ref={canvasRef}
@@ -420,11 +513,17 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
                 style={{
                   WebkitUserSelect: 'none',
                   userSelect: 'none',
+                  WebkitTouchCallout: 'none',
                 }}
               />
               {/* DRM Transparent Overlay: blocks right click, drag, image save on touch & desktop */}
               <div
                 className="absolute inset-0 z-10 select-none bg-transparent cursor-default pointer-events-auto"
+                style={{
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                }}
                 onContextMenu={(e) => e.preventDefault()}
                 onDragStart={(e) => e.preventDefault()}
               />
