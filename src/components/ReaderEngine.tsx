@@ -43,20 +43,61 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
 
   // Fullscreen Handlers
   const exitFullscreen = useCallback(() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen?.();
+    const doc = document as any;
+    if (doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement) {
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen().catch(() => {});
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      } else if (doc.mozCancelFullScreen) {
+        doc.mozCancelFullScreen();
+      } else if (doc.msExitFullscreen) {
+        doc.msExitFullscreen();
+      }
     }
     setIsFullscreen(false);
   }, []);
 
   const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen?.();
+    const doc = document as any;
+    const elem = containerRef.current as any;
+    const isCurrentlyFullscreen = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+    if (!isCurrentlyFullscreen) {
+      if (elem?.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+      } else if (elem?.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem?.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem?.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
       setIsFullscreen(true);
     } else {
       exitFullscreen();
     }
   }, [exitFullscreen]);
+
+  // Sync fullscreen state with browser events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const doc = document as any;
+      const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+      setIsFullscreen(isFs);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
 
   // Page Navigation Handlers
   const goToNext = useCallback(() => {
@@ -303,7 +344,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
   // Calculate dynamic display width based on viewport and zoom
   const getDisplayWidth = () => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-    const baseWidth = isMobile ? Math.max((window.innerWidth || 360) - 20, 310) : 800;
+    const baseWidth = isMobile ? Math.max((window.innerWidth || 360) - 16, 310) : 800;
     return Math.round(baseWidth * zoomLevel);
   };
 
@@ -318,18 +359,18 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
       }}
     >
       {/* Top Reading Navigation Bar */}
-      <header className="h-14 bg-zinc-950 border-b border-zinc-800 px-3 sm:px-4 flex items-center justify-between z-20 shrink-0">
+      <header className="h-12 sm:h-14 bg-zinc-950 border-b border-zinc-800 px-3 sm:px-4 flex items-center justify-between z-20 shrink-0">
         {/* Left: Back & Title */}
-        <div className="flex items-center space-x-2 sm:space-x-3 truncate">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 sm:flex-initial">
           <button
             onClick={onBackToLibrary}
-            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors shrink-0"
             title="Back to Library (Esc)"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <div className="truncate">
-            <h2 className="text-xs sm:text-sm font-bold text-white truncate max-w-[140px] xs:max-w-[200px] sm:max-w-xs">
+          <div className="min-w-0 flex-1 truncate">
+            <h2 className="text-xs sm:text-sm font-bold text-white truncate max-w-[200px] xs:max-w-[260px] sm:max-w-xs md:max-w-md">
               {booklet.title}
             </h2>
             <div className="flex items-center space-x-1.5 text-[10px] text-zinc-400">
@@ -344,8 +385,8 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
           </div>
         </div>
 
-        {/* Center: Page Controls */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2">
+        {/* Center: Page Controls (Desktop Only - Hidden on mobile to eliminate duplicate navigation) */}
+        <div className="hidden sm:flex items-center space-x-1.5 sm:space-x-2">
           <button
             onClick={goToPrev}
             disabled={currentPage <= 1}
@@ -377,7 +418,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         </div>
 
         {/* Right: Zoom & Tool Controls (Desktop & Tablet) */}
-        <div className="flex items-center space-x-1 sm:space-x-1.5">
+        <div className="hidden sm:flex items-center space-x-1 sm:space-x-1.5">
           <button
             onClick={zoomOut}
             className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
@@ -434,20 +475,38 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
           {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullscreen}
-            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors hidden sm:inline-flex"
+            className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
             title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
           >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFullscreen ? <Minimize2 className="w-4 h-4 text-emerald-400" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Mobile Header Right Controls: Dedicated Fullscreen Mode Toggle */}
+        <div className="flex sm:hidden items-center space-x-1.5 shrink-0">
+          <button
+            onClick={toggleFullscreen}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              isFullscreen
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 ring-1 ring-emerald-500/30'
+                : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800 active:text-white'
+            }`}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Full Screen Mode'}
+            aria-label={isFullscreen ? 'Exit Fullscreen' : 'Full Screen Mode'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4 text-emerald-400" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
       </header>
 
       {/* Mobile Top Ad Banner */}
       {ads?.mobileBanner?.enabled !== false && (
-        <MobileTopAdBanner
-          slides={ads?.mobileBanner?.slides || []}
-          rotationIntervalSeconds={ads?.mobileBanner?.rotationIntervalSeconds || 5}
-        />
+        <div className="sm:hidden shrink-0">
+          <MobileTopAdBanner
+            slides={ads?.mobileBanner?.slides || []}
+            rotationIntervalSeconds={ads?.mobileBanner?.rotationIntervalSeconds || 5}
+          />
+        </div>
       )}
 
       {/* Main Canvas Reading Viewport - Supports pinch zoom, panning and swipe navigation */}
@@ -455,7 +514,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         ref={viewportRef}
         onContextMenu={(e) => e.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
-        className="flex-1 relative overflow-auto flex items-start justify-center p-2 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container touch-pan-x touch-pan-y select-none"
+        className="flex-1 relative overflow-auto flex items-start justify-center p-1 sm:p-4 lg:p-6 bg-zinc-950/95 reader-canvas-container touch-pan-x touch-pan-y select-none"
       >
         {/* Dynamic Floating Pinch Zoom Indicator HUD */}
         {isPinchActive && (
@@ -476,7 +535,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         )}
 
         {/* Central Canvas Reading Area */}
-        <div className="flex-1 flex flex-col items-center justify-start relative min-w-0 w-full py-2 sm:py-0">
+        <div className="flex-1 flex flex-col items-center justify-start relative min-w-0 w-full py-1 sm:py-0">
           {loading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 z-30 rounded-lg min-h-[300px]">
               <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
@@ -627,7 +686,7 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         <div className="flex items-center space-x-1.5">
           <button
             onClick={fitWidth}
-            className="px-2 py-1.5 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800 text-[11px] font-medium"
+            className="px-2 py-1.5 rounded-lg bg-zinc-900 text-zinc-300 border border-zinc-800 text-[11px] font-medium active:bg-zinc-800"
             title="Fit Width"
           >
             Fit
@@ -638,11 +697,24 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
             className={`p-1.5 rounded-lg border transition-colors ${
               showThumbnails
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                : 'bg-zinc-900 text-zinc-400 border-zinc-800'
+                : 'bg-zinc-900 text-zinc-400 border-zinc-800 active:bg-zinc-800'
             }`}
             title="Toggle Thumbnails"
           >
             <Layers className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={toggleFullscreen}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              isFullscreen
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 ring-1 ring-emerald-500/30'
+                : 'bg-zinc-900 text-zinc-400 border-zinc-800 active:bg-zinc-800'
+            }`}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Full Screen'}
+            aria-label={isFullscreen ? 'Exit Fullscreen' : 'Full Screen'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4 text-emerald-400" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -683,8 +755,8 @@ export const ReaderEngine: React.FC<ReaderEngineProps> = ({
         </aside>
       )}
 
-      {/* Footer Status Bar with DRM & Navigation Info */}
-      <footer className="h-7 bg-zinc-950 border-t border-zinc-900 px-4 flex items-center justify-between text-[10px] text-zinc-500 font-mono shrink-0">
+      {/* Footer Status Bar with DRM & Navigation Info (Hidden on mobile to save vertical viewport) */}
+      <footer className="hidden sm:flex h-7 bg-zinc-950 border-t border-zinc-900 px-4 items-center justify-between text-[10px] text-zinc-500 font-mono shrink-0">
         <div className="flex items-center space-x-2">
           <span>ŪRDHV ASCENS READER</span>
           <span>•</span>

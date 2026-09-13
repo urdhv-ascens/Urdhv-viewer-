@@ -52,10 +52,10 @@ export const MobileBottomAdBanner: React.FC<MobileBottomAdBannerProps> = ({
       aria-label="Bottom advertisement"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full px-2 sm:px-3 py-1 select-none"
+      className="w-full px-2 sm:px-3 py-0.5 select-none shrink-0"
     >
       {/* Compact bottom ad banner for reader view */}
-      <div className="relative w-full h-[60px] sm:h-[72px] rounded-xl overflow-hidden border border-zinc-800/90 hover:border-emerald-500/40 transition-colors bg-black shadow-lg">
+      <div className="relative w-full h-[38px] sm:h-11 rounded-lg overflow-hidden border border-zinc-800/90 hover:border-emerald-500/40 transition-colors bg-black shadow-md">
         <a
           href={currentSlide.destinationUrl || 'https://urdhvascens.pages.dev#contact'}
           target="_blank"

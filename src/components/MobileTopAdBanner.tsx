@@ -52,10 +52,10 @@ export const MobileTopAdBanner: React.FC<MobileTopAdBannerProps> = ({
       aria-label="Advertisement"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="w-full px-2 sm:px-3 py-1.5 select-none"
+      className="w-full px-2 sm:px-3 py-1 select-none shrink-0"
     >
       {/* Full-width wide mobile ad banner card */}
-      <div className="relative w-full h-[72px] sm:h-20 rounded-xl overflow-hidden border border-zinc-800/90 hover:border-emerald-500/40 transition-colors bg-black shadow-lg">
+      <div className="relative w-full h-[40px] sm:h-12 rounded-lg overflow-hidden border border-zinc-800/90 hover:border-emerald-500/40 transition-colors bg-black shadow-md">
         <a
           href={currentSlide.destinationUrl || 'https://urdhvascens.pages.dev#contact'}
           target="_blank"
